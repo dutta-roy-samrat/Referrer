@@ -1,0 +1,19 @@
+.formContainer {
+  @apply flex flex-col gap-8;
+}
+
+.fieldContainer {
+  @apply flex flex-col sm:flex-row gap-3 sm:gap-7 justify-between items-start sm:items-center;
+}
+
+.labelContainer {
+  @apply justify-self-start;
+}
+
+.inputContainer {
+  @apply border p-3 rounded-lg w-full sm:min-w-64 sm:max-w-64 justify-self-end;
+}
+
+.textareaInput {
+  @apply resize-none h-44;
+}

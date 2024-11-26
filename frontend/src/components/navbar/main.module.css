@@ -1,0 +1,7 @@
+.navbarContainer {
+  @apply flex justify-between items-center px-4 sm:px-8 py-3 shadow-lg sticky top-0 bg-white;
+}
+
+.navbarLinks {
+  @apply flex gap-3 items-center;
+}
