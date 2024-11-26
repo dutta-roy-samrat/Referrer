@@ -1,0 +1,19 @@
+.triggerBtn {
+  @apply inline-flex items-center justify-center w-12 h-12 rounded-full bg-black border-orange-700 border-4  text-white hover:bg-gray-800 transition-colors duration-300 text-2xl font-bold;
+}
+
+.dialogTitle {
+  @apply mb-3;
+}
+
+.dialogContent {
+  @apply sm:max-w-[500px] overflow-auto w-full h-full sm:h-4/6 border-none;
+}
+
+.dialogOverlay {
+  @apply bg-transparent sm:bg-black/80;
+}
+
+.dialogFooter {
+  @apply mt-4;
+}

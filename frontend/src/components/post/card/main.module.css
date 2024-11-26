@@ -1,0 +1,3 @@
+.contentFieldContainer {
+  @apply flex gap-4 justify-start items-center flex-wrap;
+}

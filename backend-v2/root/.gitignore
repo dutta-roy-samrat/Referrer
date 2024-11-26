@@ -1,0 +1,20 @@
+# Ignore environment variables and secrets
+.env
+
+# Django static and media files
+/static/
+/media/
+
+# Python build artifacts
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environment
+venv/
+.env/
+env/
+
+# Logs
+*.log

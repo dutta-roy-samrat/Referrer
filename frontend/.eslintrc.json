@@ -1,0 +1,10 @@
+{
+  "rules": {
+    "react/no-unescaped-entities": "off",
+    "react/display-name": [
+      true,
+      { "ignoreTranspilerName": true, "checkContextObjects": true }
+    ]
+  },
+  "extends": ["next/core-web-vitals", "next/typescript"]
+}

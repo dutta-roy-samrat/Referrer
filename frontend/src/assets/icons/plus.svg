@@ -1,0 +1,15 @@
+<svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 1024 1024"
+    height="25px"
+    width="25px"
+>
+    <path
+        d="M448 192h128v640H448z"
+        fill="white"
+    ></path>
+    <path
+        d="M192 448h640v128H192z"
+        fill="white"
+    ></path>
+</svg>

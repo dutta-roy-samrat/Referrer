@@ -1,0 +1,23 @@
+.formContainer {
+  @apply grid grid-cols-1;
+}
+
+.fieldContainer {
+  @apply grid grid-cols-4 items-center mb-4;
+}
+
+.labelContainer {
+  @apply col-span-2;
+}
+
+.inputContainer {
+  @apply border p-3 rounded-lg col-span-2;
+}
+
+.textareaInput {
+  @apply resize-none h-44;
+}
+
+.formSubmitBtn {
+  @apply bg-black text-white rounded-xl py-2 px-5 h-12;
+}

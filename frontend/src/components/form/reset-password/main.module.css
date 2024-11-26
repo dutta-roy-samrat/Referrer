@@ -1,0 +1,18 @@
+.formContainer {
+  @apply grid grid-cols-3 grid-rows-2 items-center lg:grid-rows-1;
+}
+.labelContainer {
+  @apply col-span-3 lg:col-span-1 text-white lg:text-black;
+}
+.inputContainer {
+  @apply border border-white lg:border-black rounded-lg p-2 col-span-3 lg:col-span-2 text-white lg:text-black bg-black lg:bg-white focus-visible:outline-double;
+}
+.errorInput {
+  @apply border-red-600 focus-visible:outline-none;
+}
+.error {
+  @apply text-red-600 justify-self-end row-span-1 col-span-3 mt-2;
+}
+.submitBtn {
+  @apply bg-white lg:bg-black rounded-full text-black lg:text-white p-2 m-4 w-2/4 lg:w-full justify-self-center mt-10 col-span-3;
+}

@@ -1,0 +1,7 @@
+.cardClass {
+  @apply w-full lg:w-auto flex justify-center items-center flex-col py-10 bg-black border-none lg:bg-white lg:border-white;
+}
+
+.cardContent {
+  @apply w-full lg:w-auto py-0;
+}

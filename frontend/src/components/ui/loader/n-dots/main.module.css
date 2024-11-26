@@ -1,0 +1,7 @@
+.dotStyle {
+  @apply bg-black rounded-full h-2 w-2 mx-3;
+}
+
+.loaderContainer{
+  @apply flex justify-center items-center
+}

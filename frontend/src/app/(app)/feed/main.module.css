@@ -1,0 +1,15 @@
+.feedPage {
+  @apply m-5 mt-10;
+}
+
+.feedHeader {
+  @apply font-bold text-lg sm:text-3xl flex items-center;
+}
+
+.liveFeedIcon {
+  @apply bg-green-500 rounded-full px-2 py-0 ml-2 animate-pulse h-4 w-2;
+}
+
+.pageTopSection {
+  @apply flex justify-between items-center mb-5;
+}
