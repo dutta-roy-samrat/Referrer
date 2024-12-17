@@ -15,11 +15,11 @@ import NDotsLoader from "@/components/ui/loader/n-dots";
 const fetchMorePosts = () => axiosInstance.get("/posts/my-posts?start_from=0");
 
 const PostedReferrals = () => {
-  const { isLoading, isError, data, error } = useQuery({
-    queryKey: ["todos"],
+  const { isLoading, data } = useQuery({
+    queryKey: ["posts"],
     queryFn: fetchMorePosts,
+    refetchOnWindowFocus: false,
   });
-  console.log(data, "kklo");
   const renderArrowIcon = () => <Image src={arrowIcon} alt="add post" />;
   if (isLoading)
     return <NDotsLoader numOfDots={5} animationClass="animate-bounce" />;
@@ -33,7 +33,7 @@ const PostedReferrals = () => {
       </header>
       <ScrollArea className="whitespace-nowrap rounded-md border">
         <div className="flex w-max space-x-4 p-4">
-          <Feed postList={data.data} showSkills={false} showDeleteBtn />
+          <Feed postList={data?.data} showSkills={false} showDeleteBtn />
         </div>
         <ScrollBar orientation="horizontal" />
       </ScrollArea>

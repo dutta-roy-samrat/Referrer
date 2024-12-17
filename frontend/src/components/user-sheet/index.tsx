@@ -9,7 +9,6 @@ import {
   SheetClose,
   SheetFooter,
 } from "@/components/ui/sheet";
-import Link from "next/link";
 import { getResponsiveUserLinks, USER_SHEET_LINKS } from "./constants";
 import { Separator } from "../ui/separator";
 import Avatar from "../avatar";
@@ -33,6 +32,7 @@ const UserSheet = () => {
         <SheetClose
           className="p-3 text-left hover:rounded-md hover:bg-gray-100"
           onClick={() => push(url)}
+          key={label}
         >
           {label}
         </SheetClose>

@@ -1,7 +1,12 @@
 "use client";
 
 import { axiosInstance } from "@/services/axios";
-import { AxiosError } from "axios";
+import {
+  QueryObserverResult,
+  RefetchOptions,
+  useQuery,
+} from "@tanstack/react-query";
+import { AxiosError, AxiosResponse } from "axios";
 import { usePathname, useRouter } from "next/navigation";
 import {
   createContext,
@@ -25,9 +30,13 @@ type AuthProps = {
     id: string;
   };
 };
+
 type AuthContextProps = {
   resetAuthData: () => void;
   setAuthenticationData?: Dispatch<SetStateAction<AuthProps>>;
+  refetchUserDetails: (
+    options?: RefetchOptions,
+  ) => Promise<QueryObserverResult<AxiosResponse<any, any>, Error>> | void;
 } & AuthProps;
 
 const DEFAULT_AUTH_CONTEXT_VALUE = {
@@ -36,53 +45,78 @@ const DEFAULT_AUTH_CONTEXT_VALUE = {
   data: {
     full_name: "",
     email: "",
-    id: ""
+    id: "",
   },
-  resetAuthData: () => { },
+  resetAuthData: () => {},
   setAuthenticationData: undefined,
+  refetchUserDetails: () => {},
 };
+
 const AuthContext = createContext<AuthContextProps>(DEFAULT_AUTH_CONTEXT_VALUE);
 
 export const useAuthContext = () => useContext(AuthContext);
 
-const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
-  const [authenticationData, setAuthenticationData] = useState<AuthProps>(
-    DEFAULT_AUTH_CONTEXT_VALUE
-  );
-  const pathname = usePathname();
-  const { push } = useRouter()
-  useEffect(() => {
-    const fetchAuthData = async () => {
-      try {
-        const response = await axiosInstance.get("/auth/get-user-details");
-        const { payload, is_authenticated } = response.data;
+const fetchAuth = () => axiosInstance.get("/auth/get-user-details");
 
-        setAuthenticationData({
-          isLoading: false,
-          data: payload,
-          isAuthenticated: is_authenticated,
-        });
+const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
+  const pathname = usePathname();
+  const { push } = useRouter();
+
+  const { data, refetch, isLoading, error, isSuccess, isError } = useQuery({
+    queryKey: ["check-auth"],
+    queryFn: fetchAuth,
+    refetchOnWindowFocus: false,
+  });
+
+  const [authenticationData, setAuthenticationData] = useState<AuthProps>(
+    DEFAULT_AUTH_CONTEXT_VALUE,
+  );
+
+  useEffect(() => {
+    if (isSuccess) {
+      const { payload, is_authenticated } = data?.data;
+      setAuthenticationData({
+        isAuthenticated: is_authenticated,
+        data: payload,
+        isLoading,
+      });
+    }
+
+    if (isError) {
+      const err = error as AxiosError;
+      if (
+        err?.status === 401 &&
+        ![
+          "/login",
+          "/sign-up",
+          "/reset-password",
+          "/reset-password/set-password",
+        ].includes(pathname)
+      ) {
+        push(`/login?redirect=${pathname}`);
       }
-      catch (e) {
-        const err = e as AxiosError
-        if (err?.status === 401 && !["/login", "/sign-up", "/reset-password", "/reset-password/set-password"].includes(pathname)) {
-          push(`/login?redirect=${pathname}`)
-        }
-        setAuthenticationData({ ...DEFAULT_AUTH_CONTEXT_VALUE, isLoading: false })
-        console.error(err)
-      }
-    };
-    fetchAuthData();
-  }, []);
+
+      setAuthenticationData({
+        ...DEFAULT_AUTH_CONTEXT_VALUE,
+        isLoading: false,
+      });
+      console.error(err);
+    }
+  }, [isLoading]);
 
   const resetAuthData = useCallback(
     () => setAuthenticationData(DEFAULT_AUTH_CONTEXT_VALUE),
-    []
+    [],
   );
 
   const value = useMemo(
-    () => ({ ...authenticationData, resetAuthData, setAuthenticationData }),
-    [authenticationData, resetAuthData, setAuthenticationData]
+    () => ({
+      ...authenticationData,
+      resetAuthData,
+      setAuthenticationData,
+      refetchUserDetails: refetch,
+    }),
+    [authenticationData, resetAuthData, setAuthenticationData],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

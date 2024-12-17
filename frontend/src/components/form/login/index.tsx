@@ -9,12 +9,14 @@ import { EMAIL_VALIDATOR_REGEX } from "@/constants/validators";
 import styles from "./main.module.css";
 import { axiosInstance } from "@/services/axios";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useAuthContext } from "@/contexts/auth";
 
 const LoginForm = () => {
   const { register, formState, handleSubmit } = useForm();
   const { isSubmitting, errors } = formState;
   const { push } = useRouter();
   const searchParams = useSearchParams();
+  const { refetchUserDetails } = useAuthContext();
 
   const redirectUrl = searchParams.get("redirect");
 
@@ -25,6 +27,9 @@ const LoginForm = () => {
     }
     axiosInstance
       .post("/auth/login/", formData)
+      .then(() => {
+        refetchUserDetails();
+      })
       .then(() => {
         push(redirectUrl || "/");
       })
@@ -44,8 +49,9 @@ const LoginForm = () => {
         <input
           id="email"
           placeholder="Enter your email here"
-          className={`${styles.inputContainer} ${errors.email ? styles.errorInput : ""
-            }`}
+          className={`${styles.inputContainer} ${
+            errors.email ? styles.errorInput : ""
+          }`}
           {...register("email", {
             required: {
               value: true,
@@ -68,8 +74,9 @@ const LoginForm = () => {
         <input
           id="password"
           placeholder="Your password goes here"
-          className={`${styles.inputContainer} ${errors.password ? styles.errorInput : ""
-            }`}
+          className={`${styles.inputContainer} ${
+            errors.password ? styles.errorInput : ""
+          }`}
           {...register("password", {
             required: {
               value: true,

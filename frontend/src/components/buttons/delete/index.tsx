@@ -24,9 +24,9 @@ const DeleteButton = ({ className = "" }) => (
             viewBox="0 0 39 7"
             className="origin-right duration-500 group-hover:rotate-90"
         >
-            <line stroke-width="4" stroke="black" y2="5" x2="39" y1="5"></line>
+            <line strokeWidth="4" stroke="black" y2="5" x2="39" y1="5"></line>
             <line
-                stroke-width="3"
+                strokeWidth="3"
                 stroke="black"
                 y2="1.5"
                 x2="26.0357"
@@ -46,8 +46,8 @@ const DeleteButton = ({ className = "" }) => (
                 stroke="black"
                 d="M0 0H33H0ZM37 35C37 39.4183 33.4183 43 29 43H4C-0.418278 43 -4 39.4183 -4 35H4H29H37ZM4 43C-0.418278 43 -4 39.4183 -4 35V0H4V35V43ZM37 0V35C37 39.4183 33.4183 43 29 43V35V0H37Z"
             ></path>
-            <path stroke-width="4" stroke="black" d="M12 6L12 29"></path>
-            <path stroke-width="4" stroke="black" d="M21 6V29"></path>
+            <path strokeWidth="4" stroke="black" d="M12 6L12 29"></path>
+            <path strokeWidth="4" stroke="black" d="M21 6V29"></path>
         </svg>
     </button>
 
