@@ -1,0 +1,28 @@
+.formContainer {
+  @apply grid grid-cols-1 gap-4;
+}
+
+.fieldContainer {
+  @apply grid grid-rows-2;
+}
+.labelContainer {
+  @apply row-span-1 self-end;
+}
+.inputContainer {
+  @apply row-span-2 rounded-lg border border-black bg-white p-2 focus-visible:outline-none;
+}
+
+.signUpBtn {
+  @apply m-4 w-full justify-self-center rounded-full bg-black p-2 text-white lg:mt-5;
+}
+
+.nameFieldContainer {
+  @apply grid grid-rows-2 gap-4 lg:grid-cols-2 lg:grid-rows-1;
+}
+
+.errorInput {
+  @apply border-red-600 focus-visible:outline-none;
+}
+.error {
+  @apply mt-2 justify-self-end text-red-600;
+}

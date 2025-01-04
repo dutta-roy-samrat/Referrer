@@ -20,23 +20,45 @@ const PostedReferrals = () => {
     queryFn: fetchMorePosts,
     refetchOnWindowFocus: false,
   });
+  const renderContent = () =>
+    postList?.length ? (
+      renderScrollSection()
+    ) : (
+      <div className="flex h-64 items-center justify-center whitespace-nowrap rounded-md border">
+        You haven't created any posts yet. Create one to make a positive impact
+        and help countless people!
+      </div>
+    );
+  const renderLoader = () => (
+    <div className="flex h-64 items-center justify-center whitespace-nowrap rounded-md border">
+      <NDotsLoader numOfDots={5} animationClass="animate-bounce" />
+    </div>
+  );
+
   const renderArrowIcon = () => <Image src={arrowIcon} alt="add post" />;
-  if (isLoading)
-    return <NDotsLoader numOfDots={5} animationClass="animate-bounce" />;
+
+  const postList = data?.data;
+
+  const renderScrollSection = () => (
+    <ScrollArea className="whitespace-nowrap rounded-md border">
+      <div className="flex w-max space-x-4 p-4">
+        <Feed postList={postList} showSkills={false} showDeleteBtn />
+      </div>
+      <ScrollBar orientation="horizontal" />
+    </ScrollArea>
+  );
+
   return (
     <article className="px-4 pb-5 pt-14 sm:px-8">
       <header className="mb-4 flex items-center justify-between">
         <div className="text-xl font-bold">Your Posts</div>
-        <Link href="/my-posts">
-          <AnimatedArrowButton text="View All" renderIcon={renderArrowIcon} />
-        </Link>
+        {!!postList?.length && (
+          <Link href="/my-posts">
+            <AnimatedArrowButton text="View All" renderIcon={renderArrowIcon} />
+          </Link>
+        )}
       </header>
-      <ScrollArea className="whitespace-nowrap rounded-md border">
-        <div className="flex w-max space-x-4 p-4">
-          <Feed postList={data?.data} showSkills={false} showDeleteBtn />
-        </div>
-        <ScrollBar orientation="horizontal" />
-      </ScrollArea>
+      {isLoading ? renderLoader() : renderContent()}
     </article>
   );
 };

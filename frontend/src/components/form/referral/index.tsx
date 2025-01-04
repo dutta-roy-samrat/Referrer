@@ -1,17 +1,16 @@
 "use client";
 
-import { useForm } from "react-hook-form";
-
+import { FieldValues, SubmitHandler, useForm } from "react-hook-form";
 import styles from "./main.module.css";
 import { ChangeEventHandler, useRef, useState } from "react";
 import ChipsInput from "@/components/ui/chips-input";
 import { axiosInstance } from "@/services/axios";
 import { useAuthContext } from "@/contexts/auth";
 
-const ReferralForm = () => {
+const ReferralPostDialogContent = () => {
   const { register, setValue, formState, handleSubmit } = useForm();
-  const { data: userData } = useAuthContext()
-  const { isSubmitting, errors, } = formState;
+  const { data: userData } = useAuthContext();
+  const { isSubmitting, errors } = formState;
   const handleInput: ChangeEventHandler<HTMLInputElement> = (e) => {
     const inputFieldValue = e.target.value;
     if (e.target.type === "number") {
@@ -21,25 +20,30 @@ const ReferralForm = () => {
       return setValue(e.target.name, Math.floor(Number(inputFieldValue)));
     }
   };
-  const [skills, setSkills] = useState([]);
-  const skillsRef = useRef(null);
+  const [skills, setSkills] = useState<string[]>([]);
+  const skillsRef = useRef<HTMLInputElement>(null);
   const [skillsError, setSkillsError] = useState("");
-  console.log(skills)
-  const onSubmit = (data) => {
+  
+  const onSubmit: SubmitHandler<FieldValues> = (data) => {
     if (skills.length === 0 && skillsRef.current) {
-      setSkillsError("Minimum of one skill must be added.")
+      setSkillsError("Minimum of one skill must be added.");
       return skillsRef.current.focus();
     }
-    const dataToBeSubmitted = { ...data, skills, posted_by: userData.id }
+    const dataToBeSubmitted = { ...data, skills, posted_by: userData.id };
 
     const formData = new FormData();
     for (const key in dataToBeSubmitted) {
-      formData.append(key, dataToBeSubmitted[key])
+      formData.append(key, dataToBeSubmitted[key]);
     }
-    return axiosInstance.post("/posts/", formData)
-  }
+    return axiosInstance.post("/posts/", formData);
+  };
+
   return (
-    <form className={styles.formContainer} id="post-referral" onSubmit={handleSubmit(onSubmit)}>
+    <form
+      className={styles.formContainer}
+      id="post-referral"
+      onSubmit={handleSubmit(onSubmit)}
+    >
       <div className={styles.fieldContainer}>
         <label htmlFor="company_name" className={styles.labelContainer}>
           Company Name
@@ -48,13 +52,11 @@ const ReferralForm = () => {
           id="company_name"
           placeholder="ABC"
           {...register("company_name", {
-            required: {
-              value: true,
-              message: "Company Name is a required field",
-            },
+            required: "Company Name is a required field",
           })}
           className={styles.inputContainer}
         />
+        {errors.company_name && <p>{errors.company_name.message}</p>}
       </div>
       <div className={styles.fieldContainer}>
         <label htmlFor="job_title" className={styles.labelContainer}>
@@ -64,13 +66,11 @@ const ReferralForm = () => {
           id="job_title"
           placeholder="Write the role here"
           {...register("job_title", {
-            required: {
-              value: true,
-              message: "Job Title is a required field",
-            },
+            required: "Job Title is a required field",
           })}
           className={styles.inputContainer}
         />
+        {errors.job_title && <p>{errors.job_title.message}</p>}
       </div>
       <div className={styles.fieldContainer}>
         <label htmlFor="job_description" className={styles.labelContainer}>
@@ -81,84 +81,64 @@ const ReferralForm = () => {
           placeholder="Write the requirement related to job here"
           className={`${styles.inputContainer} ${styles.textareaInput}`}
           {...register("job_description", {
-            required: {
-              value: true,
-              message: "Job Descrition is a required field",
-            },
+            required: "Job Description is a required field",
           })}
         />
+        {errors.job_description && <p>{errors.job_description.message}</p>}
       </div>
       <div className={styles.fieldContainer}>
-        <label htmlFor="experience_in_years" className={styles.labelContainer}>
+        <label htmlFor="experience" className={styles.labelContainer}>
           Experience (in years)
         </label>
         <input
-          id="experience_in_years"
+          id="experience"
           placeholder="3"
           className={styles.inputContainer}
-          {...register("experience_in_years", {
-            required: {
-              value: true,
-              message: "Please share the experience requirements for the job !",
-            },
+          {...register("experience", {
+            required: "Please share the experience requirements for the job!",
           })}
           type="number"
           min={0}
           onChange={handleInput}
         />
+        {errors.experience && <p>{errors.experience.message}</p>}
       </div>
       <div className={styles.fieldContainer}>
-        <label htmlFor="salary_in_lpa" className={styles.labelContainer}>
+        <label htmlFor="salary" className={styles.labelContainer}>
           Salary (in LPA)
         </label>
         <input
-          id="salary_in_lpa"
+          id="salary"
           placeholder="12"
           className={styles.inputContainer}
-          {...register("salary_in_lpa", {
-            required: {
-              value: true,
-              message: "Please share the salary details of the job !",
-            },
+          {...register("salary", {
+            required: "Please share the salary details of the job!",
           })}
           type="number"
           min={0}
           onChange={handleInput}
         />
+        {errors.salary && <p>{errors.salary.message}</p>}
       </div>
       <div className={styles.fieldContainer}>
         <label htmlFor="expiry_date" className={styles.labelContainer}>
-          Exipry Date
+          Expiry Date
         </label>
         <input
           id="expiry_date"
           className={styles.inputContainer}
           {...register("expiry_date", {
-            required: {
-              value: true,
-              message:
-                "Please mention the date of expiry for the application !",
-            },
+            required: "Please mention the date of expiry for the application!",
           })}
           type="date"
         />
+        {errors.expiry_date && <p>{errors.expiry_date.message}</p>}
       </div>
       <div className={styles.fieldContainer} ref={skillsRef}>
         <label htmlFor="skills" className={styles.labelContainer}>
-          <div>Skills</div>
+          Skills
         </label>
-        {/* <input
-          id="skills"
-          placeholder="Mention the skills required for the job"
-          className={`${styles.inputContainer} ${styles.textareaInput}`}
-          {...register("skills", {
-            required: {
-              value: true,
-              message: "Please list the skills required for the job !",
-            },
-          })}
-        /> */}
-        <div className="justify-end col-span-2">
+        <div className="col-span-2 justify-end">
           <ChipsInput chips={skills} setChips={setSkills} ref={skillsRef} />
         </div>
         {skillsError && <p>{skillsError}</p>}
@@ -171,18 +151,17 @@ const ReferralForm = () => {
           id="location"
           placeholder="Bangalore"
           {...register("location", {
-            required: {
-              value: true,
-              message: "Job Location is a required field",
-            },
+            required: "Job Location is a required field",
           })}
           className={styles.inputContainer}
         />
+        {errors.location && <p>{errors.location.message}</p>}
       </div>
       <button
-        type="submit"
         className={styles.formSubmitBtn}
         disabled={isSubmitting}
+        type="submit"
+        form="post-referral"
       >
         Post
       </button>
@@ -190,4 +169,4 @@ const ReferralForm = () => {
   );
 };
 
-export default ReferralForm;
+export default ReferralPostDialogContent;

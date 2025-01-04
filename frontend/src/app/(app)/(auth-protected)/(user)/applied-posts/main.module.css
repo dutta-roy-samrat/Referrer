@@ -1,0 +1,10 @@
+.myPostsPage {
+  @apply m-5 mt-10;
+}
+
+.myPostsHeader {
+  @apply font-bold text-lg sm:text-3xl flex items-center;
+}
+.pageTopSection {
+  @apply flex justify-between items-center mb-5;
+}

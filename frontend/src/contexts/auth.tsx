@@ -1,13 +1,10 @@
 "use client";
 
-import { axiosInstance } from "@/services/axios";
 import {
-  QueryObserverResult,
-  RefetchOptions,
+  ApolloQueryResult,
+  OperationVariables,
   useQuery,
-} from "@tanstack/react-query";
-import { AxiosError, AxiosResponse } from "axios";
-import { usePathname, useRouter } from "next/navigation";
+} from "@apollo/client";
 import {
   createContext,
   Dispatch,
@@ -16,96 +13,88 @@ import {
   SetStateAction,
   useCallback,
   useContext,
-  useEffect,
   useMemo,
   useState,
 } from "react";
+import { fetchBasicUserInfo } from "@/graphql/query/basic-user-details";
+
+export type AuthDataType = {
+  firstName: string;
+  lastName: string;
+  email: string;
+  id: string;
+  resume: File | null;
+  experience: string;
+  profileImage: string;
+};
 
 type AuthProps = {
-  isAuthenticated: boolean | null;
   isLoading: boolean;
-  data: {
-    full_name: string;
-    email: string;
-    id: string;
-  };
+  isAuthenticated: boolean;
+  data: AuthDataType;
 };
 
 type AuthContextProps = {
   resetAuthData: () => void;
-  setAuthenticationData?: Dispatch<SetStateAction<AuthProps>>;
+  setAuthenticationData: Dispatch<SetStateAction<AuthProps>>;
   refetchUserDetails: (
-    options?: RefetchOptions,
-  ) => Promise<QueryObserverResult<AxiosResponse<any, any>, Error>> | void;
+    variables?: Partial<OperationVariables> | undefined,
+  ) => Promise<ApolloQueryResult<any>> | void;
 } & AuthProps;
 
-const DEFAULT_AUTH_CONTEXT_VALUE = {
-  isAuthenticated: null,
+const DEFAULT_AUTH_VALUE = {
   isLoading: true,
+  isAuthenticated: false,
   data: {
-    full_name: "",
+    firstName: "",
+    lastName: "",
     email: "",
     id: "",
+    resume: null,
+    experience: "",
+    profileImage: "",
   },
+};
+const DEFAULT_AUTH_CONTEXT_VALUE = {
   resetAuthData: () => {},
-  setAuthenticationData: undefined,
+  setAuthenticationData: () => {},
   refetchUserDetails: () => {},
+  ...DEFAULT_AUTH_VALUE,
 };
 
 const AuthContext = createContext<AuthContextProps>(DEFAULT_AUTH_CONTEXT_VALUE);
 
 export const useAuthContext = () => useContext(AuthContext);
 
-const fetchAuth = () => axiosInstance.get("/auth/get-user-details");
-
 const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
-  const pathname = usePathname();
-  const { push } = useRouter();
+  const [authenticationData, setAuthenticationData] =
+    useState<AuthProps>(DEFAULT_AUTH_VALUE);
 
-  const { data, refetch, isLoading, error, isSuccess, isError } = useQuery({
-    queryKey: ["check-auth"],
-    queryFn: fetchAuth,
-    refetchOnWindowFocus: false,
-  });
-
-  const [authenticationData, setAuthenticationData] = useState<AuthProps>(
-    DEFAULT_AUTH_CONTEXT_VALUE,
-  );
-
-  useEffect(() => {
-    if (isSuccess) {
-      const { payload, is_authenticated } = data?.data;
+  const { refetch, loading } = useQuery(fetchBasicUserInfo, {
+    skip: authenticationData.isAuthenticated,
+    ssr: true,
+    onError: (error) => {
       setAuthenticationData({
-        isAuthenticated: is_authenticated,
-        data: payload,
-        isLoading,
-      });
-    }
-
-    if (isError) {
-      const err = error as AxiosError;
-      if (
-        err?.status === 401 &&
-        ![
-          "/login",
-          "/sign-up",
-          "/reset-password",
-          "/reset-password/set-password",
-        ].includes(pathname)
-      ) {
-        push(`/login?redirect=${pathname}`);
-      }
-
-      setAuthenticationData({
-        ...DEFAULT_AUTH_CONTEXT_VALUE,
+        ...DEFAULT_AUTH_VALUE,
         isLoading: false,
       });
-      console.error(err);
-    }
-  }, [isLoading]);
+      if (error?.graphQLErrors) {
+        error.graphQLErrors.forEach((graphQLError) =>
+          console.error("GraphQL error:", graphQLError.message),
+        );
+      }
+    },
+    onCompleted: (data) => {
+      setAuthenticationData({
+        isAuthenticated: true,
+        data: { ...DEFAULT_AUTH_VALUE.data, ...data.getUserDetails },
+        isLoading: false,
+      });
+    },
+  });
 
   const resetAuthData = useCallback(
-    () => setAuthenticationData(DEFAULT_AUTH_CONTEXT_VALUE),
+    () => setAuthenticationData(DEFAULT_AUTH_VALUE),
     [],
   );
 

@@ -8,9 +8,9 @@ export default function AppLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <div className={styles.layoutContainer}>
+    <>
       <Navbar />
-      {children}
-    </div>
+      <div className="p-6">{children}</div>
+    </>
   );
 }

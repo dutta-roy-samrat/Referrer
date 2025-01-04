@@ -1,19 +1,19 @@
 .bannerContainer {
-  @apply bg-black h-80 text-white flex justify-center items-center py-5 px-4;
+  @apply flex h-80 items-center justify-center bg-black px-4 py-5 text-white sm:px-8 rounded-xl;
 }
 
 .bannerRightSection {
-  @apply flex flex-col justify-center items-end sm:items-center px-5;
+  @apply flex flex-col items-end justify-center px-5 sm:items-center;
 }
 
 .bannerTitle {
-  @apply text-white text-xl sm:text-5xl lg:text-6xl font-bold tracking-tight;
+  @apply text-xl font-bold tracking-tight text-white sm:text-5xl lg:text-6xl;
 }
 
 .addPostCta {
-  @apply bg-gradient-to-r from-orange-400 to-red-500 text-white rounded-full mt-10 w-[200px] sm:w-[500px] shadow-lg hover:shadow-xl border-none h-[3.4rem];
+  @apply mt-10 h-[3.4rem] w-[200px] rounded-full border-none bg-gradient-to-r from-orange-400 to-red-500 text-white shadow-lg hover:shadow-xl sm:w-[500px];
 }
 
 .addPostCtaIcon {
-  @apply transition-all duration-500 ease-in-out rounded-full w-12;
+  @apply w-12 rounded-full transition-all duration-500 ease-in-out;
 }

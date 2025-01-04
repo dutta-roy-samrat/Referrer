@@ -4,8 +4,8 @@ import Cropper, { Area } from "react-easy-crop";
 
 type ImageCropperModalContentProps = {
   imageSrc: string;
-  setProfileImage: React.Dispatch<React.SetStateAction<string | null>>;
-  setImageSrc: React.Dispatch<React.SetStateAction<string | null>>;
+  setProfileImage: React.Dispatch<React.SetStateAction<string>>;
+  setImageSrc: React.Dispatch<React.SetStateAction<string>>;
   setSelectedFile: React.Dispatch<React.SetStateAction<File | null>>;
   selectedFile: File | null;
   setConfirmedFile: React.Dispatch<React.SetStateAction<File | null>>;
@@ -59,23 +59,15 @@ const ImageCropperModalContent: FC<ImageCropperModalContentProps> = ({
     const croppedUrl = URL.createObjectURL(croppedBlob);
     setProfileImage(croppedUrl);
     setConfirmedFile(selectedFile);
-    setImageSrc(null);
+    setImageSrc("");
     setSelectedFile(null);
   };
 
   return (
-    <DialogContent
-      onClose={() => {
-        setImageSrc(null);
-        setSelectedFile(null);
-      }}
-    >
+    <DialogContent onClose={() => { setImageSrc(""); setSelectedFile(null); }}>
       <div className="relative mt-4 w-full bg-gray-300">
         <div className="flex flex-col items-center">
-          <div
-            className="w-full"
-            style={{ position: "relative", height: "400px" }}
-          >
+          <div className="w-full" style={{ position: "relative", height: "400px" }}>
             <Cropper
               image={imageSrc}
               crop={crop}

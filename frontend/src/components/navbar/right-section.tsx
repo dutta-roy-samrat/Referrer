@@ -9,22 +9,27 @@ import NDotsLoader from "@/components/ui/loader/n-dots";
 
 import styles from "./main.module.css";
 import { useCurrentDeviceContext } from "@/contexts/device";
+import { usePathname } from "next/navigation";
 
 const NavRighSection: FC = () => {
   const { isAuthenticated, isLoading } = useAuthContext();
   const { isResponsive } = useCurrentDeviceContext();
+  const pathname = usePathname();
   if (isLoading) return <NDotsLoader numOfDots={5} />;
   const renderAuthenticatedLinks = () =>
     isAuthenticated ? (
       <>
-        <Link href="/" className="hover:underline mr-3">
+        <Link
+          href="/"
+          className={`mr-3 rounded-lg p-3 hover:bg-gray-100 ${pathname === "/" ? "underline" : ""}`}
+        >
           Dashboard
         </Link>
         <UserSheet />
       </>
     ) : (
       <Link
-        className="bg-black text-white py-2 px-3 rounded-full hover:opacity-80"
+        className="rounded-full bg-black px-3 py-2 text-white hover:opacity-80"
         href="/login"
       >
         Login
@@ -32,7 +37,10 @@ const NavRighSection: FC = () => {
     );
   const renderWebView = () => (
     <div className={styles.navbarLinks}>
-      <Link href="/feed" className="hover:underline mr-3">
+      <Link
+        href="/feed"
+        className={`mr-3 rounded-lg p-3 hover:bg-gray-100 ${pathname === "/feed" ? "underline" : ""}`}
+      >
         Feed
       </Link>
       {renderAuthenticatedLinks()}

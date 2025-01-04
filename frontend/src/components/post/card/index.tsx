@@ -15,16 +15,17 @@ import { PostProps } from "@/components/post/card/types";
 
 import JobField from "../shared/job-field";
 import Skills from "../shared/skills";
-import ArrowOnHover from "@/components/links/arrow-on-hover";
+import ArrowOnHover from "@/components/ui/arrow-on-hover";
+import Link from "next/link";
 
 const PostCard: FC<PostProps> = ({
   showDeleteBtn = false,
   skills_display = [],
-  experience_in_years,
+  experience,
   expiry_date,
   job_title,
   company_name,
-  salary_in_lpa,
+  salary,
   location,
   id,
 }) => {
@@ -42,11 +43,11 @@ const PostCard: FC<PostProps> = ({
         <JobField icon={<LocationIcon />} text={location} />
         <JobField
           icon={<SackDollarIcon alt="salary" />}
-          text={`${salary_in_lpa} LPA`}
+          text={`${salary} LPA`}
         />
         <JobField
           icon={<UserTieIcon alt="experience" />}
-          text={`${experience_in_years} years`}
+          text={`${experience} years`}
         />
         <JobField icon={<ClockIcon alt="expiry date" />} text={expiry_date} />
         {skills_display?.length ? <Skills skills={skills_display} /> : null}
@@ -55,8 +56,9 @@ const PostCard: FC<PostProps> = ({
       <CardFooter className="flex justify-center px-6 py-4 sm:justify-end">
         <ArrowOnHover
           text="Check Description"
-          linkUrl={`/post/${id}`}
-          linkClass="w-40"
+          href={`/post/${id}`}
+          className="w-40"
+          Component={Link}
         />
       </CardFooter>
     </Card>

@@ -4,8 +4,8 @@ export const USER_SHEET_LINKS = [
     label: "Profile",
   },
   {
-    url: "/password",
-    label: "Password",
+    url: "/change-password/",
+    label: "Change Password",
   },
 ];
 

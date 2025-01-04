@@ -1,10 +1,7 @@
 import Feed from "@/components/feed";
 
-import { PostProps } from "@/components/post/card/types";
-
 import { axiosServerInstance } from "@/services/axios";
 
-import { POST_QUERY_LIMIT } from "@/constants/posts";
 import styles from "./main.module.css";
 import AddReferralModal from "@/components/modals/add-referral-modal";
 
@@ -21,7 +18,14 @@ const FeedPage = async () => {
           <AddReferralModal />
         </div>
         <main className="flex flex-col gap-4">
-          <Feed postList={res.data}/>
+          {res.data.length ? (
+            <Feed postList={res.data} />
+          ) : (
+            <div>
+              No referrals are posted at the moment. Please check again later
+              for any openings.
+            </div>
+          )}
         </main>
       </div>
     );

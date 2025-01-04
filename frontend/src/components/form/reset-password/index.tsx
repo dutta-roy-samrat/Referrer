@@ -17,7 +17,7 @@ const ResetPasswordForm = () => {
     for (const key in data) {
       formData.append(key, data[key]);
     }
-    await axiosInstance.post("/auth/password-reset/", formData).then(() => push("/reset-password/set-new-password"))
+    await axiosInstance.post("/auth/password-reset/", formData).then(() => push("/change-password"))
   };
   return (
     <form
