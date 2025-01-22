@@ -2,8 +2,9 @@
 
 import { useAuthContext } from "@/contexts/auth";
 import styles from "./main.module.css";
+import Image from "next/image";
 
-const Avatar = ({ className = "" }) => {
+const Avatar = ({ avatarFallbackClass = "", avatarClass = "" }) => {
   const { data } = useAuthContext();
   const { firstName, lastName } = data;
   const getAllWordInitializers = () => {
@@ -11,8 +12,16 @@ const Avatar = ({ className = "" }) => {
     const lastNameInitial = lastName ? lastName[0] : "";
     return `${firstNameInitial}${lastNameInitial}`;
   };
-  return (
-    <div className={`${styles.avatarFallback} ${className}`}>
+  return data.profileImage ? (
+    <Image
+      src={data.profileImage}
+      alt="avatar"
+      width={100}
+      height={100}
+      className={`${styles.avatar} ${avatarClass}`}
+    />
+  ) : (
+    <div className={`${styles.avatarFallback} ${avatarFallbackClass}`}>
       {getAllWordInitializers()}
     </div>
   );

@@ -23,17 +23,17 @@ from django.contrib.auth.views import (
 from .views import (
     RegisterView,
     LoginView,
-    CustomTokenRefreshView,
     CustomPasswordResetView,
     CustomPasswordResetConfirmView,
-    UpdateUserView
+    UpdateUserView,
+    check_refresh_token_valdation,
 )
 
 urlpatterns = [
     path("register/", RegisterView.as_view()),
     path("update-details/", UpdateUserView.as_view()),
     path("login/", LoginView.as_view()),
-    path("token/refresh", CustomTokenRefreshView.as_view()),
+    path("authorization-check/", check_refresh_token_valdation),
     path("password-reset/", CustomPasswordResetView.as_view(), name="password-reset"),
     path(
         "password-reset/done/",

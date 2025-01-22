@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/dialog";
 
 import styles from "./main.module.css";
-import AnimatedArrowButton from "@/components/buttons/animated-arrow";
+import AnimatedArrowButton from "@/components/ui/buttons/animated-arrow";
 import plusIcon from "@/assets/icons/plus.svg"
 import Image from "next/image";
 

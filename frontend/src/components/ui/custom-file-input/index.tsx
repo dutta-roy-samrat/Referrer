@@ -1,41 +1,46 @@
 import { cn } from "@/lib/utils";
-import Link from "next/link";
 import { FC, ReactNode } from "react";
 
 type CustomFileInputProps = {
   label?: ReactNode;
   file: File | null | undefined;
   handleInputChange?: (event: React.ChangeEvent<HTMLInputElement>) => void;
-  inputProps?: any;
+  inputProps?: React.InputHTMLAttributes<HTMLInputElement>;
   inputId: string;
   className?: string;
   removeInput?: () => void;
   labelText?: string;
-  fileUrl: string;
+  fileUrl?: string;
 };
 
-const defaultObj: { [key: string]: any } = {};
 const CustomFileInput: FC<CustomFileInputProps> = ({
   label,
-  file = defaultObj,
+  file = null,
   handleInputChange,
-  inputProps,
+  inputProps = {},
   inputId,
   className = "",
   removeInput,
-  labelText,
+  labelText = "Choose a file",
   fileUrl = "",
 }) => {
   const selectedFileName =
-    file?.name?.length > 15 ? `${file?.name.slice(0, 16)}...` : file?.name;
+    file?.name && file?.name.length > 15
+      ? `${file?.name.slice(0, 15)}...`
+      : file?.name;
+  const renderAttachedFileUrl = () => (
+    <a href={fileUrl} target="_blank" rel="noopener noreferrer">
+      {selectedFileName}
+    </a>
+  );
   return (
-    <div className={cn("flex items-center", className)}>
+    <div className={cn("flex items-center gap-2", className)}>
       {label || (
         <label
           htmlFor={inputId}
-          className="block cursor-pointer border p-1 text-sm font-medium text-black"
+          className="block cursor-pointer rounded border p-2 text-sm font-medium text-black"
         >
-          {labelText || "Choose a file"}
+          {labelText}
         </label>
       )}
       <input
@@ -44,21 +49,18 @@ const CustomFileInput: FC<CustomFileInputProps> = ({
         onChange={handleInputChange}
         className="hidden"
         {...inputProps}
-        {...[file]}
       />
       {file?.name ? (
-        <div className="break-all rounded-md bg-gray-200 px-2 text-sm text-black">
-          <a href={fileUrl} target="_blank">
-            {selectedFileName}
-          </a>
+        <div className="flex items-center gap-2 rounded bg-gray-200 px-2 text-sm text-black">
+          {fileUrl && renderAttachedFileUrl()}
           {removeInput && (
-            <span onClick={removeInput} className="cursor-pointer">
+            <span onClick={removeInput} className="cursor-pointer text-red-500">
               &#x2715;
             </span>
           )}
         </div>
       ) : (
-        <div>No file chosen</div>
+        fileUrl && <span className="text-gray-500">No file chosen</span>
       )}
     </div>
   );

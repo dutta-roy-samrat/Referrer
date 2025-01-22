@@ -1,8 +1,8 @@
 import { axiosInstance } from "@/services/axios";
 
-export const fetchFile = async ({ data, fileName }) => {
+export const fetchFile = async ({ data, fileName = "" }: { data: string; fileName: string; }) => {
   try {
-    const res = await axiosInstance.get(`media/${data}`, {
+    const res = await axiosInstance.get(data, {
       responseType: "blob",
     });
 

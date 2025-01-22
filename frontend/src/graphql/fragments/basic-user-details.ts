@@ -6,5 +6,6 @@ export const BasicUserDetailsFragment = gql`
     firstName
     lastName
     email
+    profileImage
   }
 `;

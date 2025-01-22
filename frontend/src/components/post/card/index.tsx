@@ -10,7 +10,7 @@ import SackDollarIcon from "@/components/ui/icons/sack-dollar";
 import UserTieIcon from "@/components/ui/icons/user-tie";
 import ClockIcon from "@/components/ui/icons/clock";
 import LocationIcon from "@/components/ui/icons/location";
-import DeleteButton from "@/components/buttons/delete";
+import DeleteButton from "@/components/ui/buttons/delete";
 import { PostProps } from "@/components/post/card/types";
 
 import JobField from "../shared/job-field";

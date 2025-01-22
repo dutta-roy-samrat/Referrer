@@ -4,40 +4,49 @@ import Cropper, { Area } from "react-easy-crop";
 
 type ImageCropperModalContentProps = {
   imageSrc: string;
-  setProfileImage: React.Dispatch<React.SetStateAction<string>>;
-  setImageSrc: React.Dispatch<React.SetStateAction<string>>;
+  setProfileImage: (imgSrc: string) => void;
   setSelectedFile: React.Dispatch<React.SetStateAction<File | null>>;
   selectedFile: File | null;
   setConfirmedFile: React.Dispatch<React.SetStateAction<File | null>>;
+  crop: {
+    x: number;
+    y: number;
+  };
+  setCrop: React.Dispatch<
+    React.SetStateAction<{
+      x: number;
+      y: number;
+    }>
+  >;
+  zoom: number;
+  setZoom: React.Dispatch<React.SetStateAction<number>>;
 };
 
 const ImageCropperModalContent: FC<ImageCropperModalContentProps> = ({
   imageSrc,
   setProfileImage,
-  setImageSrc,
   setSelectedFile,
   selectedFile,
   setConfirmedFile,
+  crop,
+  setCrop,
+  zoom,
+  setZoom,
 }) => {
   const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null);
-  const [crop, setCrop] = useState({ x: 0, y: 0 });
-  const [zoom, setZoom] = useState(1);
 
   const onCropComplete = useCallback((_: Area, croppedAreaPixels: Area) => {
     setCroppedAreaPixels(croppedAreaPixels);
   }, []);
 
-  const createImage = (url: string): Promise<HTMLImageElement> => {
-    return new Promise((resolve, reject) => {
-      const img = document.createElement("img");
-      img.addEventListener("load", () => resolve(img));
-      img.addEventListener("error", (error) => reject(error));
-      img.src = url;
-    });
+  const createImage = (url: string): HTMLImageElement => {
+    const img = document.createElement("img");
+    img.src = url;
+    return img;
   };
 
   const getCroppedImage = async (): Promise<Blob> => {
-    const image = await createImage(imageSrc as string);
+    const image = createImage(imageSrc as string);
     const canvas = document.createElement("canvas");
     const ctx = canvas.getContext("2d");
 
@@ -58,16 +67,27 @@ const ImageCropperModalContent: FC<ImageCropperModalContentProps> = ({
     const croppedBlob = await getCroppedImage();
     const croppedUrl = URL.createObjectURL(croppedBlob);
     setProfileImage(croppedUrl);
-    setConfirmedFile(selectedFile);
-    setImageSrc("");
+    const croppedFile = new File(
+      [croppedBlob],
+      selectedFile?.name || "cropped-image.jpg",
+      { type: "image/jpeg" },
+    );
+    setConfirmedFile(croppedFile);
     setSelectedFile(null);
   };
 
   return (
-    <DialogContent onClose={() => { setImageSrc(""); setSelectedFile(null); }}>
+    <DialogContent
+      onClose={() => {
+        setSelectedFile(null);
+      }}
+    >
       <div className="relative mt-4 w-full bg-gray-300">
         <div className="flex flex-col items-center">
-          <div className="w-full" style={{ position: "relative", height: "400px" }}>
+          <div
+            className="w-full"
+            style={{ position: "relative", height: "400px" }}
+          >
             <Cropper
               image={imageSrc}
               crop={crop}
@@ -76,6 +96,7 @@ const ImageCropperModalContent: FC<ImageCropperModalContentProps> = ({
               onCropChange={setCrop}
               onZoomChange={setZoom}
               onCropComplete={onCropComplete}
+              cropShape="round"
             />
           </div>
           <DialogTrigger>

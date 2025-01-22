@@ -26,3 +26,7 @@
 .error {
   @apply mt-2 justify-self-end text-red-600;
 }
+
+.disabledBtn {
+  @apply bg-slate-600;
+}

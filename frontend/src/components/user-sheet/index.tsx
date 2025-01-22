@@ -12,9 +12,9 @@ import {
 import { getResponsiveUserLinks, USER_SHEET_LINKS } from "./constants";
 import { Separator } from "../ui/separator";
 import Avatar from "../avatar";
-import LogoutButton from "../buttons/logout";
+import LogoutButton from "../ui/buttons/logout";
 import { useCurrentDeviceContext } from "@/contexts/device";
-import HamburgerButton from "../buttons/hamburger";
+import HamburgerButton from "../ui/buttons/hamburger";
 import { useAuthContext } from "@/contexts/auth";
 import { useRouter } from "next/navigation";
 

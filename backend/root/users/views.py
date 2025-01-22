@@ -12,6 +12,7 @@ from rest_framework.status import (
     HTTP_400_BAD_REQUEST,
     HTTP_500_INTERNAL_SERVER_ERROR,
     HTTP_200_OK,
+    HTTP_401_UNAUTHORIZED,
 )
 from django.contrib.auth.forms import PasswordResetForm
 
@@ -20,9 +21,10 @@ from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
-from django.core.exceptions import ValidationError, PermissionDenied
+from django.core.exceptions import ValidationError
 from django.contrib.auth.hashers import make_password
 from django.conf import settings
+from django.http import HttpResponse
 
 from .serializers import (
     RegisterUserSerializer,
@@ -71,9 +73,11 @@ class RegisterView(APIView):
 
 
 class LoginView(TokenObtainPairView):
+    authentication_classes = []
+
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
-
+        print(serializer)
         try:
             serializer.is_valid(raise_exception=True)
         except TokenError as e:
@@ -99,37 +103,6 @@ class LoginView(TokenObtainPairView):
             samesite="Strict",
             max_age=int(api_settings.REFRESH_TOKEN_LIFETIME.total_seconds()),
         )
-        return response
-
-
-class CustomTokenRefreshView(TokenRefreshView):
-    def get(self, request, *args, **kwargs):
-        refresh = request.COOKIES.get("refresh")
-        if not refresh:
-            return Response(
-                {"detail": "Refresh token is required."}, status=HTTP_400_BAD_REQUEST
-            )
-        response = Response(
-            {"message": "New Refresh Token created successfully"}, status=HTTP_200_OK
-        )
-        new_refresh_token = RefreshToken.for_user(request.user)
-        response.set_cookie(
-            key="access",
-            value=str(new_refresh_token.access_token),
-            httponly=True,
-            secure=False,  # Set True in production
-            samesite="Strict",
-            max_age=int(api_settings.ACCESS_TOKEN_LIFETIME.total_seconds()),
-        )
-        response.set_cookie(
-            key="refresh",
-            value=str(new_refresh_token),
-            httponly=True,
-            secure=False,  # Set True in production
-            samesite="Strict",
-            max_age=int(api_settings.REFRESH_TOKEN_LIFETIME.total_seconds()),
-        )
-
         return response
 
 
@@ -278,6 +251,8 @@ class UpdateUserView(APIView):
     def patch(self, request):
         try:
             user = request.user
+            if request.data.get("profile_image") == "null":
+                request.data["profile_image"] = None
             serializer = RegisterUserSerializer(user, data=request.data, partial=True)
             if serializer.is_valid():
                 serializer.save()
@@ -292,3 +267,13 @@ class UpdateUserView(APIView):
                 {"error": "An error occurred while updating user details."},
                 status=HTTP_500_INTERNAL_SERVER_ERROR,
             )
+
+
+def check_refresh_token_valdation(request):
+    if request.COOKIES.get("refresh") is None:
+        return HttpResponse(status=HTTP_400_BAD_REQUEST)
+    try:
+        if request.COOKIES.get("refresh"):
+            return HttpResponse(status=HTTP_200_OK)
+    except TokenError:
+        return HttpResponse(status=HTTP_401_UNAUTHORIZED)

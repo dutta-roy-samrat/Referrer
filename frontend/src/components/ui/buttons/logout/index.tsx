@@ -1,7 +1,7 @@
 "use client";
 
 import { axiosInstance } from "@/services/axios";
-import styles from "./main.module.css";
+import styles from './main.module.css';
 import { useRouter } from "next/navigation";
 import { useAuthContext } from "@/contexts/auth";
 

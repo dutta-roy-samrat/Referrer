@@ -13,8 +13,9 @@ import { useAuthContext } from "@/contexts/auth";
 import { onErrorToastMsg, onSuccessToastMsg } from "@/services/toastify";
 import { AxiosError } from "axios";
 import { fetchFile } from "@/action/file";
+import ErrorMessage from '@/components/shared/error-message';
 
-type FormFields = "resume" | "experience";
+type FormFieldType = "resume" | "experience";
 type ReferralApplicationFormProps = {
   id: string;
 };
@@ -39,7 +40,7 @@ const ReferralApplicationForm: FC<ReferralApplicationFormProps> = ({ id }) => {
     ) {
       const { getUserDetails } = data;
       Object.keys(getUserDetails).forEach((key) => {
-        const fieldKey = snakeCase(key) as FormFields;
+        const fieldKey = snakeCase(key) as FormFieldType;
         const fetchedData = getUserDetails[fieldKey];
         if (fetchedData && key === "resume") {
           const fileName = fetchedData.split("resumes/")[1];
@@ -77,9 +78,9 @@ const ReferralApplicationForm: FC<ReferralApplicationFormProps> = ({ id }) => {
       const numberValue =
         inputFieldValue === "" ? 0 : Math.floor(Number(inputFieldValue));
       if (numberValue < Number(e.target.min)) {
-        return setValue(e.target.name as FormFields, 0);
+        return setValue(e.target.name as FormFieldType, 0);
       }
-      return setValue(e.target.name as FormFields, numberValue);
+      return setValue(e.target.name as FormFieldType, numberValue);
     }
   };
 
@@ -129,7 +130,7 @@ const ReferralApplicationForm: FC<ReferralApplicationFormProps> = ({ id }) => {
         labelText="Update your resume"
       />
       {errors.resume && (
-        <p className={styles.errorText}>{errors.resume.message}</p>
+        <ErrorMessage error={errors.resume} className={styles.errorText} />
       )}
 
       <div className={styles.fieldContainer}>
@@ -151,7 +152,7 @@ const ReferralApplicationForm: FC<ReferralApplicationFormProps> = ({ id }) => {
           onChange={handleInput}
         />
         {errors.experience && (
-          <p className={styles.errorText}>{errors.experience.message}</p>
+          <ErrorMessage error={errors.experience} className={styles.errorText} />
         )}
       </div>
 

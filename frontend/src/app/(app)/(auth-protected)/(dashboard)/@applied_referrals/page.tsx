@@ -1,6 +1,6 @@
 "use client";
 
-import AnimatedArrowButton from "@/components/buttons/animated-arrow";
+import AnimatedArrowButton from "@/components/ui/buttons/animated-arrow";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import Link from "next/link";
 import omit from "lodash/omit";

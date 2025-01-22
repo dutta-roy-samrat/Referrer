@@ -4,7 +4,6 @@ import localFont from "next/font/local";
 
 import ScrollToTop from "@/components/scroll-to-top";
 import CurrentDeviceContextProvider from "@/contexts/device";
-import AuthProvider from "@/contexts/auth";
 import { ToastContainer } from "react-toastify";
 
 import "./globals.css";
@@ -43,14 +42,10 @@ export default function RootLayout({
         <ToastContainer />
         <ApolloGraphqlWrapper>
           <ReactQueryWrapper>
-            <AuthProvider>
-              <CurrentDeviceContextProvider>
-                <Suspense>
-                  <ScrollToTop />
-                </Suspense>
-                <div className="h-full w-full">{children}</div>
-              </CurrentDeviceContextProvider>
-            </AuthProvider>
+            <CurrentDeviceContextProvider>
+              <ScrollToTop />
+              <div className="h-full w-full">{children}</div>
+            </CurrentDeviceContextProvider>
           </ReactQueryWrapper>
         </ApolloGraphqlWrapper>
       </body>

@@ -24,7 +24,7 @@ export type AuthDataType = {
   email: string;
   id: string;
   resume: File | null;
-  experience: string;
+  experience: number;
   profileImage: string;
 };
 
@@ -51,7 +51,7 @@ const DEFAULT_AUTH_VALUE = {
     email: "",
     id: "",
     resume: null,
-    experience: "",
+    experience: 0,
     profileImage: "",
   },
 };
@@ -70,7 +70,7 @@ const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
   const [authenticationData, setAuthenticationData] =
     useState<AuthProps>(DEFAULT_AUTH_VALUE);
 
-  const { refetch, loading } = useQuery(fetchBasicUserInfo, {
+  const { refetch } = useQuery(fetchBasicUserInfo, {
     skip: authenticationData.isAuthenticated,
     ssr: true,
     onError: (error) => {
@@ -87,7 +87,13 @@ const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
     onCompleted: (data) => {
       setAuthenticationData({
         isAuthenticated: true,
-        data: { ...DEFAULT_AUTH_VALUE.data, ...data.getUserDetails },
+        data: {
+          ...DEFAULT_AUTH_VALUE.data,
+          ...data.getUserDetails,
+          profileImage: data.getUserDetails.profileImage
+            ? `http://localhost:8000/media/${data.getUserDetails.profileImage}`
+            : "",
+        },
         isLoading: false,
       });
     },

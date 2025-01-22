@@ -94,12 +94,6 @@ class MyPostsView(APIView):
             except Post.DoesNotExist:
                 return Response({"error": "Post not found"}, status=HTTP_404_NOT_FOUND)
 
-            # if request.user == post_instance.posted_by:
-            #     return Response(
-            #         {"error": "Cannot apply to a post created by yourself!"},
-            #         status=HTTP_400_BAD_REQUEST,
-            #     )
-
             if post_instance.applied_by.filter(id=request.user.id).exists():
                 return Response(
                     {"message": "You have already applied to this post."},

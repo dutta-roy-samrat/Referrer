@@ -1,3 +1,7 @@
 .avatarFallback {
-  @apply border-2 px-5 py-4 rounded-full font-bold text-lg leading-[1.92rem];
+  @apply rounded-full border-2 px-5 py-4 text-lg font-bold leading-[1.92rem];
+}
+
+.avatar {
+  @apply h-16 w-16 rounded-full font-bold leading-[1.92rem];
 }
