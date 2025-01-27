@@ -1,0 +1,11 @@
+.contentFieldContainer {
+  @apply flex flex-wrap items-center justify-start gap-4;
+}
+
+.skillsListContainer {
+  @apply flex flex-wrap gap-2;
+}
+
+.skillPill {
+  @apply rounded-full bg-black px-4 py-1 text-white;
+}

@@ -1,17 +1,29 @@
 from django_eventstream import send_event
+from django.db.models import Q
+from django.shortcuts import get_object_or_404
+from datetime import date
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
 from rest_framework.status import (
     HTTP_200_OK,
     HTTP_400_BAD_REQUEST,
     HTTP_201_CREATED,
     HTTP_500_INTERNAL_SERVER_ERROR,
-    HTTP_404_NOT_FOUND,
 )
+from rest_framework_simplejwt.tokens import RefreshToken
+from users.serializers import RegisterUserSerializer
+from users.models import User
 from .serializers import PostsSerializer
 from .models import Post
-from users.models import User
+import logging
+
+logger = logging.getLogger(__name__)
+
+
+def get_paginated_query(queryset, limit, start_from):
+    limit = int(limit) if limit else 20
+    start_from = int(start_from) if start_from else 0
+    return queryset[start_from : start_from + limit]
 
 
 class PostsView(APIView):
@@ -19,93 +31,115 @@ class PostsView(APIView):
 
     def get(self, request, *args, **kwargs):
         try:
-            post_query_limit = (
-                int(request.query_params.get("limit"))
-                if request.query_params.get("limit") is not None
-                else 20
-            )
-            send_post_starting_from = (
-                int(request.query_params.get("start_from"))
-                if request.query_params.get("start_from") is not None
-                else 0
-            )
+            refresh_token = request.COOKIES.get("refresh")
+            user_id = RefreshToken(refresh_token).payload.get("user_id")
+        except:
+            user_id = None
+        try:
             post_id = kwargs.get("id")
             if post_id:
-                posts = Post.objects.get(id=post_id)
-                posts_serializer = PostsSerializer(posts)
+                post = get_object_or_404(Post, id=post_id)
+                post_serializer = PostsSerializer(post)
+                serialized_data = post_serializer.data
+                serialized_data["view_only"] = False
+                serialized_data["applied_by"] = []
+                if user_id is not None:
+                    user_instance = get_object_or_404(User, id=user_id)
+                    if (
+                        user_instance in post.applied_by.all()
+                        or post.posted_by == user_instance
+                    ):
+                        serialized_data["view_only"] = True
+                    if post.posted_by == user_instance:
+                        serialized_data["applied_by"] = [
+                            RegisterUserSerializer(user).data
+                            for user in post.applied_by.all()
+                        ]
+                return Response(serialized_data, status=HTTP_200_OK)
+            if user_id is not None:
+                user_instance = get_object_or_404(User, id=user_id)
+                queryset = Post.objects.filter(
+                    Q(expiry_date__gte=date.today())
+                    & ~Q(applied_by=user_instance)
+                    & ~Q(posted_by=user_instance)
+                )
             else:
-                posts = Post.objects.all()[send_post_starting_from:post_query_limit]
-                posts_serializer = PostsSerializer(posts, many=True)
+                queryset = Post.objects.filter(expiry_date__gte=date.today())
+            posts = get_paginated_query(
+                queryset,
+                request.query_params.get("limit"),
+                request.query_params.get("start_from"),
+            )
+            posts_serializer = PostsSerializer(posts, many=True)
             return Response(posts_serializer.data, status=HTTP_200_OK)
+
         except Exception as e:
-            return Response({"error": str(e)}, status=HTTP_500_INTERNAL_SERVER_ERROR)
+            logger.error(f"Error fetching posts: {str(e)}", exc_info=True)
+            return Response(
+                {"error": "An unexpected error occurred."},
+                status=HTTP_500_INTERNAL_SERVER_ERROR,
+            )
 
     def post(self, request, *args, **kwargs):
         try:
-            # Serialize the incoming post data
             post_serializer = PostsSerializer(data=request.data)
             if post_serializer.is_valid():
-                post_serializer.save()  # Save the new post
-                # Prepare data to send via SSE
-                post_data = post_serializer.data
-                # Send event to all connected clients
-                send_event("post", "message", post_data)
+                post = post_serializer.save()
+                send_event("post", "message", PostsSerializer(post).data)
                 return Response(
-                    {"message": "Post successfully created"},
-                    status=HTTP_201_CREATED,
+                    {"message": "Post successfully created"}, status=HTTP_201_CREATED
                 )
+
             return Response(post_serializer.errors, status=HTTP_400_BAD_REQUEST)
+
         except Exception as e:
-            return Response({"error": str(e)}, status=HTTP_500_INTERNAL_SERVER_ERROR)
+            logger.error(f"Error creating post: {str(e)}", exc_info=True)
+            return Response(
+                {"error": "An unexpected error occurred."},
+                status=HTTP_500_INTERNAL_SERVER_ERROR,
+            )
 
 
 class MyPostsView(APIView):
-    permission_classes = [IsAuthenticated]
-
     def get(self, request, *args, **kwargs):
         try:
-            post_query_limit = (
-                int(request.query_params.get("limit"))
-                if request.query_params.get("limit") is not None
-                else 20
+            posts = get_paginated_query(
+                request.user.posted.all(),
+                request.query_params.get("limit"),
+                request.query_params.get("start_from"),
             )
-            send_post_starting_from = (
-                int(request.query_params.get("start_from"))
-                if request.query_params.get("start_from") is not None
-                else 0
-            )
-            posts = request.user.posted.all()[send_post_starting_from:post_query_limit]
             posts_serializer = PostsSerializer(posts, many=True)
             return Response(posts_serializer.data, status=HTTP_200_OK)
+
         except Exception as e:
-            return Response({"error": str(e)}, status=HTTP_500_INTERNAL_SERVER_ERROR)
+            logger.error(f"Error fetching user posts: {str(e)}", exc_info=True)
+            return Response(
+                {"error": "An unexpected error occurred."},
+                status=HTTP_500_INTERNAL_SERVER_ERROR,
+            )
 
     def post(self, request, *args, **kwargs):
         try:
             post_id = request.data.get("post_id")
-
             if not post_id:
                 return Response(
                     {"error": "post_id is required"}, status=HTTP_400_BAD_REQUEST
                 )
 
-            try:
-                post_instance = Post.objects.get(id=post_id)
-            except Post.DoesNotExist:
-                return Response({"error": "Post not found"}, status=HTTP_404_NOT_FOUND)
+            post_instance = get_object_or_404(Post, id=post_id)
 
             if post_instance.applied_by.filter(id=request.user.id).exists():
                 return Response(
                     {"message": "You have already applied to this post."},
-                    status=HTTP_200_OK,
+                    status=HTTP_400_BAD_REQUEST,
                 )
 
             user_instance_updated = False
-            provided_resume_data = request.data.get("resume")
+            provided_resume = request.data.get("resume")
             provided_experience = request.data.get("experience")
 
-            if provided_resume_data and request.user.resume != provided_resume_data:
-                request.user.resume = provided_resume_data
+            if provided_resume and request.user.resume != provided_resume:
+                request.user.resume = provided_resume
                 user_instance_updated = True
 
             if provided_experience and request.user.experience != provided_experience:
@@ -122,26 +156,49 @@ class MyPostsView(APIView):
             )
 
         except Exception as e:
-            return Response({"error": str(e)}, status=HTTP_500_INTERNAL_SERVER_ERROR)
+            logger.error(f"Error applying to post: {str(e)}", exc_info=True)
+            return Response(
+                {"error": "An unexpected error occurred."},
+                status=HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
+    def delete(self, request, **kwargs):
+        try:
+            post_id = kwargs.get("id")
+            if not post_id:
+                return Response(
+                    {"error": "post_id is required"}, status=HTTP_400_BAD_REQUEST
+                )
+
+            post_instance = get_object_or_404(Post, id=post_id)
+            post_instance.delete()
+            send_event("post", "message", {"action": "delete", "id": post_id})
+            return Response(
+                {"message": "Post deleted successfully!"}, status=HTTP_200_OK
+            )
+
+        except Exception as e:
+            logger.error(f"Error deleting post: {str(e)}", exc_info=True)
+            return Response(
+                {"error": "An unexpected error occurred."},
+                status=HTTP_500_INTERNAL_SERVER_ERROR,
+            )
 
 
 class AppliedPostsView(APIView):
     def get(self, request):
         try:
-            post_query_limit = (
-                int(request.query_params.get("limit"))
-                if request.query_params.get("limit") is not None
-                else 20
+            posts = get_paginated_query(
+                request.user.applied_to.all(),
+                request.query_params.get("limit"),
+                request.query_params.get("start_from"),
             )
-            send_post_starting_from = (
-                int(request.query_params.get("start_from"))
-                if request.query_params.get("start_from") is not None
-                else 0
-            )
-            posts = request.user.applied_to.all()[
-                send_post_starting_from:post_query_limit
-            ]
-            post_serializer = PostsSerializer(posts, many=True)
-            return Response(post_serializer.data, status=HTTP_200_OK)
+            posts_serializer = PostsSerializer(posts, many=True)
+            return Response(posts_serializer.data, status=HTTP_200_OK)
+
         except Exception as e:
-            return Response({"error": str(e)}, status=HTTP_500_INTERNAL_SERVER_ERROR)
+            logger.error(f"Error fetching applied posts: {str(e)}", exc_info=True)
+            return Response(
+                {"error": "An unexpected error occurred."},
+                status=HTTP_500_INTERNAL_SERVER_ERROR,
+            )

@@ -13,5 +13,9 @@
 }
 
 .formSubmitBtn {
-  @apply bg-black text-white rounded-xl py-2 px-5 h-12;
+  @apply h-12 rounded-xl bg-black px-5 py-2 text-white;
+}
+
+.errorText {
+  @apply mt-2 text-red-600;
 }

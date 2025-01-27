@@ -63,18 +63,16 @@ REST_FRAMEWORK = {
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
-    "corsheaders.middleware.CorsMiddleware",  # Move this to the top
+    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware",
-    "django.middleware.csrf.CsrfViewMiddleware",  # If CSRF is required
+    "django.middleware.csrf.CsrfViewMiddleware",
     "users.middleware.RevalidateJWTTokenMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
-GRAPHENE = {
-    "SCHEMA": "root.schema.schema"
-}
+GRAPHENE = {"SCHEMA": "root.schema.schema"}
 
 CORS_ALLOWED_ORIGINS = [os.getenv("CORS_ALLOWED_ORIGINS", default="")]
 CORS_ALLOW_CREDENTIALS = True
@@ -121,8 +119,8 @@ DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
         "NAME": "referrer-db",
-        "USER": os.getenv("DB_USER",default=""),
-        "PASSWORD": os.getenv("DB_PASSWORD",default=""),
+        "USER": os.getenv("DB_USER", default=""),
+        "PASSWORD": os.getenv("DB_PASSWORD", default=""),
         "HOST": "127.0.0.1",
         "PORT": "5432",
     }
@@ -183,3 +181,7 @@ SIMPLE_JWT = {
 }
 
 ASGI_APPLICATION = "root.asgi.application"
+
+COMPANY_NAME = "Referrer"
+
+SECURE_COOKIES = False

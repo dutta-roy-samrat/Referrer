@@ -26,14 +26,15 @@ from .views import (
     CustomPasswordResetView,
     CustomPasswordResetConfirmView,
     UpdateUserView,
-    check_refresh_token_valdation,
+    LogoutView,
+    check_refresh_token_validation,
 )
 
 urlpatterns = [
     path("register/", RegisterView.as_view()),
     path("update-details/", UpdateUserView.as_view()),
     path("login/", LoginView.as_view()),
-    path("authorization-check/", check_refresh_token_valdation),
+    path("authorization-check/", check_refresh_token_validation),
     path("password-reset/", CustomPasswordResetView.as_view(), name="password-reset"),
     path(
         "password-reset/done/",
@@ -50,4 +51,5 @@ urlpatterns = [
         PasswordResetCompleteView.as_view(),
         name="password_reset_complete",
     ),
+    path("logout", LogoutView.as_view()),
 ]

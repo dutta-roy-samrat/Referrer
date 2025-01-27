@@ -5,7 +5,7 @@ import styles from "./main.module.css";
 
 const NDotsLoader = ({
   numOfDots = 3,
-  animationClass = "animate-pulse",
+  animationClass = styles.defaultAnimationClass,
   dotClass = "",
   containerClass = "",
 }) => {
@@ -14,7 +14,7 @@ const NDotsLoader = ({
     const dotTimeouts = dotsRef.current.map((ref, idx) =>
       setTimeout(() => {
         ref?.classList.add(animationClass);
-      }, idx * 200)
+      }, idx * 200),
     );
 
     return () => {

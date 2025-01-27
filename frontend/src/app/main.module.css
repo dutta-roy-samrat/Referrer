@@ -1,0 +1,11 @@
+.content {
+  @apply h-full w-full;
+}
+
+.body {
+  @apply antialiased;
+}
+
+.html {
+  @apply h-full;
+}

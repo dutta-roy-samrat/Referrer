@@ -6,23 +6,23 @@
   @apply grid grid-rows-2;
 }
 .labelContainer {
-  @apply row-span-1 text-white lg:text-black self-end;
+  @apply row-span-1 self-end text-white lg:text-black;
 }
 .inputContainer {
-  @apply border border-white lg:border-black rounded-lg p-2 row-span-2 bg-black lg:bg-white text-white lg:text-black focus-visible:outline-none;
+  @apply row-span-2 rounded-lg border border-white bg-black p-2 text-white focus-visible:outline-none lg:border-black lg:bg-white lg:text-black;
 }
 
 .signUpBtn {
-  @apply bg-white lg:bg-black rounded-full text-black lg:text-white p-2 m-4 w-2/4 lg:w-full justify-self-center mt-10 lg:mt-5;
+  @apply m-4 mt-10 w-2/4 justify-self-center bg-white p-2 text-black lg:mt-5 lg:w-full lg:bg-black lg:text-white;
 }
 
 .nameFieldContainer {
-  @apply grid grid-rows-2 gap-4 lg:grid-rows-1 lg:grid-cols-2;
+  @apply grid grid-rows-2 gap-4 lg:grid-cols-2 lg:grid-rows-1;
 }
 
 .errorInput {
   @apply border-red-600 focus-visible:outline-none;
 }
 .error {
-  @apply text-red-600 justify-self-end mt-2;
+  @apply mt-2 justify-self-end text-red-600;
 }

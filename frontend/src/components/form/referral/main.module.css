@@ -3,21 +3,29 @@
 }
 
 .fieldContainer {
-  @apply grid grid-cols-4 items-center mb-4;
+  @apply m-4 grid grid-cols-3 grid-rows-1 items-center;
 }
 
 .labelContainer {
-  @apply col-span-2;
+  @apply col-span-3 row-span-1 lg:col-span-1;
 }
 
 .inputContainer {
-  @apply border p-3 rounded-lg col-span-2;
+  @apply col-span-3 rounded-lg border p-3 lg:col-span-2;
 }
 
 .textareaInput {
-  @apply resize-none h-44;
+  @apply h-44 resize-none;
 }
 
 .formSubmitBtn {
-  @apply bg-black text-white rounded-xl py-2 px-5 h-12;
+  @apply h-12 rounded-xl bg-black px-5 py-2 text-white;
+}
+
+.error {
+  @apply col-span-3 row-span-1 mt-2 justify-self-end text-red-600;
+}
+
+.skillsInputContainer {
+  @apply col-span-3 justify-end lg:col-span-2;
 }

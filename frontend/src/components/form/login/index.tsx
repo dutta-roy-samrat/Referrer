@@ -1,15 +1,23 @@
 "use client";
 
 import { ReactNode } from "react";
-import Link from "next/link";
 import { FieldValues, SubmitHandler, useForm } from "react-hook-form";
+
+import { useRouter, useSearchParams } from "next/navigation";
+import { useAuthContext } from "@/contexts/auth";
+
+import StyledButton from "@/components/ui/button/styled-button";
+import StyledLink from "@/components/ui/link/styled-link";
+
+import { axiosInstance } from "@/services/axios";
+import { onErrorToastMsg } from "@/services/toastify";
+
+import { formDataSerializer } from "@/helpers/serializers";
+import { getInputClass } from "@/helpers/utils";
 
 import { EMAIL_VALIDATOR_REGEX } from "@/constants/validators";
 
 import styles from "./main.module.css";
-import { axiosInstance } from "@/services/axios";
-import { useRouter, useSearchParams } from "next/navigation";
-import { useAuthContext } from "@/contexts/auth";
 
 const LoginForm = () => {
   const { register, formState, handleSubmit } = useForm();
@@ -17,14 +25,10 @@ const LoginForm = () => {
   const { push } = useRouter();
   const searchParams = useSearchParams();
   const { refetchUserDetails } = useAuthContext();
-
   const redirectUrl = searchParams.get("redirect");
 
   const onSubmit: SubmitHandler<FieldValues> = (data) => {
-    const formData = new FormData();
-    for (const key in data) {
-      formData.append(key, data[key]);
-    }
+    const formData = formDataSerializer(data);
     axiosInstance
       .post("/auth/login/", formData)
       .then(() => {
@@ -33,7 +37,10 @@ const LoginForm = () => {
       .then(() => {
         push(redirectUrl || "/");
       })
-      .catch((err) => console.error(err));
+      .catch((err) => {
+        onErrorToastMsg(err.message);
+        console.error(err);
+      });
   };
 
   return (
@@ -49,9 +56,10 @@ const LoginForm = () => {
         <input
           id="email"
           placeholder="Enter your email here"
-          className={`${styles.inputContainer} ${
-            errors.email ? styles.errorInput : ""
-          }`}
+          className={getInputClass({
+            className: styles.inputContainer,
+            error: errors.email,
+          })}
           {...register("email", {
             required: {
               value: true,
@@ -74,9 +82,10 @@ const LoginForm = () => {
         <input
           id="password"
           placeholder="Your password goes here"
-          className={`${styles.inputContainer} ${
-            errors.password ? styles.errorInput : ""
-          }`}
+          className={getInputClass({
+            className: styles.inputContainer,
+            error: errors.password,
+          })}
           {...register("password", {
             required: {
               value: true,
@@ -91,12 +100,16 @@ const LoginForm = () => {
           </p>
         )}
       </div>
-      <button className={styles.loginBtn} disabled={isSubmitting}>
+      <StyledButton
+        disabled={isSubmitting}
+        loading={isSubmitting}
+        className={styles.loginBtn}
+      >
         Login
-      </button>
-      <Link href="/reset-password" className={styles.forgotPasswordLink}>
+      </StyledButton>
+      <StyledLink href="/reset-password" className={styles.forgotPasswordLink}>
         Forgot Password
-      </Link>
+      </StyledLink>
     </form>
   );
 };

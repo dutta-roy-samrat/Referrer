@@ -1,74 +1,61 @@
 "use client";
 
-import CustomFileInput from "@/components/ui/custom-file-input";
-import { ChangeEventHandler, FC, useEffect } from "react";
+import {
+  useEffect,
+  FC,
+  ChangeEventHandler,
+  Dispatch,
+  SetStateAction,
+} from "react";
 import { FieldValues, SubmitHandler, useForm } from "react-hook-form";
 import { useQuery } from "@apollo/client";
-import snakeCase from "lodash/snakeCase";
+import { AxiosError } from "axios";
 
-import styles from "./main.module.css";
+import CustomFileInput from "@/components/ui/custom-file-input";
+import ErrorMessage from "@/components/shared/error-message";
+import StyledButton from "@/components/ui/button/styled-button";
+
 import { fetchApplicationInfo } from "@/graphql/query/application-info";
 import { axiosInstance } from "@/services/axios";
 import { useAuthContext } from "@/contexts/auth";
 import { onErrorToastMsg, onSuccessToastMsg } from "@/services/toastify";
-import { AxiosError } from "axios";
 import { fetchFile } from "@/action/file";
-import ErrorMessage from '@/components/shared/error-message';
+import { formDataSerializer } from "@/helpers/serializers";
+import { getInputClass } from "@/helpers/utils";
+
+import { MEDIA_LIBRARY_URL } from "@/constants/environment-variables";
+
+import styles from "./main.module.css";
 
 type FormFieldType = "resume" | "experience";
 type ReferralApplicationFormProps = {
   id: string;
+  setIsModalOpen: Dispatch<SetStateAction<boolean>>;
 };
 
-const ReferralApplicationForm: FC<ReferralApplicationFormProps> = ({ id }) => {
+type FormState = { experience: number; resume: File[] | null };
+
+const DEFAULT_FORM_VALUES = {
+  experience: 0,
+  resume: null,
+};
+
+const ReferralApplicationForm: FC<ReferralApplicationFormProps> = ({
+  id,
+  setIsModalOpen,
+}) => {
   const { data, loading } = useQuery(fetchApplicationInfo);
-  const { setAuthenticationData, data: authData } = useAuthContext();
+  const { setAuthenticationData, data: authData, isLoading } = useAuthContext();
 
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    formState: { errors, isSubmitting },
     setValue,
     watch,
-  } = useForm();
-
-  useEffect(() => {
-    if (
-      data?.getUserDetails &&
-      !loading &&
-      !(authData.resume || authData.experience)
-    ) {
-      const { getUserDetails } = data;
-      Object.keys(getUserDetails).forEach((key) => {
-        const fieldKey = snakeCase(key) as FormFieldType;
-        const fetchedData = getUserDetails[fieldKey];
-        if (fetchedData && key === "resume") {
-          const fileName = fetchedData.split("resumes/")[1];
-          return fetchFile({ data: getUserDetails[fieldKey], fileName }).then(
-            (res) => {
-              setValue(fieldKey, res as File);
-              setAuthenticationData((prevData) => ({
-                ...prevData,
-                data: {
-                  ...prevData.data,
-                  resume: res as File,
-                },
-              }));
-            },
-          );
-        }
-        setValue(fieldKey, authData[fieldKey] || getUserDetails[fieldKey]);
-        if (authData[fieldKey]) return;
-        setAuthenticationData((prevData) => ({
-          ...prevData,
-          data: {
-            ...prevData.data,
-            [fieldKey]: authData[fieldKey] || getUserDetails[fieldKey],
-          },
-        }));
-      });
-    }
-  }, [loading, data, setValue]);
+  } = useForm<FormState>({
+    defaultValues: DEFAULT_FORM_VALUES,
+  });
 
   const resumeFile = watch("resume")?.[0] || authData?.resume;
 
@@ -80,7 +67,9 @@ const ReferralApplicationForm: FC<ReferralApplicationFormProps> = ({ id }) => {
       if (numberValue < Number(e.target.min)) {
         return setValue(e.target.name as FormFieldType, 0);
       }
-      return setValue(e.target.name as FormFieldType, numberValue);
+      return setValue(e.target.name as FormFieldType, numberValue, {
+        shouldValidate: true,
+      });
     }
   };
 
@@ -94,26 +83,53 @@ const ReferralApplicationForm: FC<ReferralApplicationFormProps> = ({ id }) => {
       },
     }));
 
-    const formData = new FormData();
+    const formData = formDataSerializer({ ...data, resume: resumeFile });
     formData.append("post_id", id);
-    for (const key in data) {
-      formData.append(key, data[key]);
-    }
 
     try {
       const res = await axiosInstance.post("/posts/apply/", formData);
       onSuccessToastMsg(res.data.message);
+      setIsModalOpen(false);
     } catch (error) {
       const err = error as AxiosError;
-      console.error("Error submitting application:", error);
-      onErrorToastMsg(err.message);
+      onErrorToastMsg(
+        (err?.response?.data as { message: string })?.message || err.message,
+      );
     }
   };
 
   const resumeUrl = resumeFile ? URL.createObjectURL(resumeFile) : "";
 
+  useEffect(() => {
+    if (data?.getUserDetails && !loading && !isLoading) {
+      const { getUserDetails } = data;
+
+      Object.keys(DEFAULT_FORM_VALUES).forEach((key) => {
+        const fieldKey = key as keyof FormState;
+        const fetchedData = authData[fieldKey] || getUserDetails[fieldKey];
+        if (fetchedData && fieldKey === "resume") {
+          if (authData[fieldKey])
+            return setValue(fieldKey, [fetchedData] as File[]);
+          const fileName = fetchedData.split("resumes/")[1];
+          const { pathname } = new URL(fetchedData, MEDIA_LIBRARY_URL);
+          return fetchFile({ data: pathname.slice(1), fileName }).then(
+            (res) => {
+              console.log(res, "kkl");
+              setValue(fieldKey, [res] as File[]);
+            },
+          );
+        }
+        setValue(fieldKey, fetchedData);
+      });
+    }
+  }, [loading, data, setValue]);
+
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className={styles.formContainer}>
+    <form
+      onSubmit={handleSubmit(onSubmit)}
+      className={styles.formContainer}
+      id="referral-application"
+    >
       <label>Resume</label>
       <CustomFileInput
         file={resumeFile}
@@ -128,9 +144,13 @@ const ReferralApplicationForm: FC<ReferralApplicationFormProps> = ({ id }) => {
         }}
         inputId="resume"
         labelText="Update your resume"
+        className=""
       />
       {errors.resume && (
-        <ErrorMessage error={errors.resume} className={styles.errorText} />
+        <ErrorMessage
+          error={errors.resume?.message}
+          className={styles.errorText}
+        />
       )}
 
       <div className={styles.fieldContainer}>
@@ -140,7 +160,10 @@ const ReferralApplicationForm: FC<ReferralApplicationFormProps> = ({ id }) => {
         <input
           id="experience"
           placeholder="3"
-          className={styles.inputContainer}
+          className={getInputClass({
+            className: styles.inputContainer,
+            error: errors.experience,
+          })}
           {...register("experience", {
             required: "Experience is required",
             min: { value: 0, message: "Experience cannot be negative" },
@@ -152,11 +175,15 @@ const ReferralApplicationForm: FC<ReferralApplicationFormProps> = ({ id }) => {
           onChange={handleInput}
         />
         {errors.experience && (
-          <ErrorMessage error={errors.experience} className={styles.errorText} />
+          <ErrorMessage
+            error={errors.experience?.message}
+            className={styles.errorText}
+          />
         )}
       </div>
-
-      <button className={styles.formSubmitBtn}>Apply</button>
+      <StyledButton form="referral-application" disabled={isSubmitting}>
+        Apply
+      </StyledButton>
     </form>
   );
 };

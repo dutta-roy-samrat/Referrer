@@ -1,0 +1,23 @@
+.noFileChosen {
+  @apply text-gray-500;
+}
+
+.customFileInputContainer {
+  @apply flex items-center gap-2;
+}
+
+.customFileInputLabel {
+  @apply block cursor-pointer rounded border p-2 text-sm font-medium text-black;
+}
+
+.hiddenFileInput {
+  @apply hidden;
+}
+
+.selectionText {
+  @apply flex items-center gap-2 rounded bg-gray-200 px-2 text-sm text-black;
+}
+
+.removeFileIcon {
+  @apply cursor-pointer text-red-500;
+}

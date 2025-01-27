@@ -1,0 +1,39 @@
+.defaultChipsInput {
+  @apply flex flex-wrap items-center rounded-lg border p-3;
+}
+
+.focusedChipsInput {
+  @apply border-2 border-black;
+}
+
+.defaultTextInput {
+  @apply max-w-[140px] flex-1 border-none p-2 text-sm outline-none sm:max-w-full;
+}
+
+.diabledTextInput {
+  @apply bg-gray-200 text-gray-500;
+}
+
+.enabledTextInput {
+  @apply bg-white;
+}
+
+.chip {
+  @apply m-1 flex items-center rounded-full bg-black px-4 py-2 text-sm font-medium text-white;
+}
+
+.errorText {
+  @apply text-red-500;
+}
+
+.skillsAddedText {
+  @apply text-gray-600;
+}
+
+.inputStatusInfo {
+  @apply mt-2 text-sm;
+}
+
+.chipDeleteBtn {
+  @apply ml-2 h-1 w-1 p-2 text-white hover:text-gray-200 focus:outline-none;
+}

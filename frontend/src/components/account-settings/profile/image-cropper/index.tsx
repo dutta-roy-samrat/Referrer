@@ -1,6 +1,10 @@
-import { DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { FC, useCallback, useState } from "react";
 import Cropper, { Area } from "react-easy-crop";
+
+import { DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import StyledButton from "@/components/ui/button/styled-button";
+
+import styles from "./main.module.css";
 
 type ImageCropperModalContentProps = {
   imageSrc: string;
@@ -82,33 +86,24 @@ const ImageCropperModalContent: FC<ImageCropperModalContentProps> = ({
         setSelectedFile(null);
       }}
     >
-      <div className="relative mt-4 w-full bg-gray-300">
-        <div className="flex flex-col items-center">
-          <div
-            className="w-full"
-            style={{ position: "relative", height: "400px" }}
-          >
-            <Cropper
-              image={imageSrc}
-              crop={crop}
-              zoom={zoom}
-              aspect={1}
-              onCropChange={setCrop}
-              onZoomChange={setZoom}
-              onCropComplete={onCropComplete}
-              cropShape="round"
-            />
-          </div>
-          <DialogTrigger>
-            <button
-              type="button"
-              onClick={handleSaveImage}
-              className="mt-4 rounded-md bg-gray-700 px-4 py-2 text-white hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
-            >
-              Save Image
-            </button>
-          </DialogTrigger>
+      <div className={styles.dialogContentContainer}>
+        <div className={styles.cropperContainer}>
+          <Cropper
+            image={imageSrc}
+            crop={crop}
+            zoom={zoom}
+            aspect={1}
+            onCropChange={setCrop}
+            onZoomChange={setZoom}
+            onCropComplete={onCropComplete}
+            cropShape="round"
+          />
         </div>
+        <DialogTrigger>
+          <StyledButton onClick={handleSaveImage} className={styles.saveBtn}>
+            Save Image
+          </StyledButton>
+        </DialogTrigger>
       </div>
     </DialogContent>
   );

@@ -1,32 +1,45 @@
 "use client";
 
-import { FC, ReactNode, useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
+import { FC, ReactNode } from "react";
+import { SubmitHandler, useForm } from "react-hook-form";
 
-import styles from "./main.module.css";
+import StyledButton from "@/components/ui/button/styled-button";
 
 import { axiosInstance } from "@/services/axios";
-import { useAuthContext } from "@/contexts/auth";
+
+import { formDataSerializer } from "@/helpers/serializers";
+
+import styles from "./main.module.css";
+import { onErrorToastMsg, onSuccessToastMsg } from "@/services/toastify";
+import { useRouter } from "next/navigation";
 
 type SetNewPasswordFormProps = {
   id: string;
   token: string;
 };
 
+type FormType = {
+  new_password: string;
+  confirm_password: string;
+};
+
 const PasswordChangeForm: FC<SetNewPasswordFormProps> = ({ id, token }) => {
-  const { register, formState, handleSubmit, getValues } = useForm();
+  const { register, formState, handleSubmit, getValues } = useForm<FormType>();
+  const { push } = useRouter();
+
   const { isSubmitting, errors } = formState;
-  const onSubmit = async (data) => {
-    const formData = new FormData();
-    for (const key in data) {
-      formData.append(key, data[key]);
-    }
-    const res = await axiosInstance.post(
-      `/auth/password-reset-confirm/${id}/${token}/`,
-      formData,
-    );
-    return res;
+
+  const onSubmit: SubmitHandler<FormType> = (data) => {
+    const formData = formDataSerializer(data);
+    axiosInstance
+      .post(`/auth/password-reset-confirm/${id}/${token}/`, formData)
+      .then(({ data: resData }) => {
+        onSuccessToastMsg(resData.message);
+        push("/login");
+      })
+      .catch((err) => onErrorToastMsg(err.message));
   };
+
   return (
     <form
       className={styles.formContainer}
@@ -57,9 +70,6 @@ const PasswordChangeForm: FC<SetNewPasswordFormProps> = ({ id, token }) => {
           </p>
         )}
       </div>
-      {errors.email && (
-        <p className={styles.error}>{errors.email?.message as ReactNode}</p>
-      )}
       <div className={styles.fieldContainer}>
         <label htmlFor="confirm_password" className={styles.labelContainer}>
           Confirm Password
@@ -90,9 +100,12 @@ const PasswordChangeForm: FC<SetNewPasswordFormProps> = ({ id, token }) => {
         )}
       </div>
 
-      <button disabled={isSubmitting} className={styles.submitBtn}>
+      <StyledButton
+        disabled={isSubmitting}
+        className={styles.submitBtn}
+      >
         Change my password
-      </button>
+      </StyledButton>
     </form>
   );
 };

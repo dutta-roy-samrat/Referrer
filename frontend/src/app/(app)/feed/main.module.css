@@ -3,13 +3,25 @@
 }
 
 .feedHeader {
-  @apply font-bold text-lg sm:text-3xl flex items-center;
+  @apply flex items-center text-lg font-bold sm:text-3xl;
 }
 
 .liveFeedIcon {
-  @apply bg-green-500 rounded-full px-2 py-0 ml-2 animate-pulse h-4 w-2;
+  @apply ml-2 h-4 w-2 animate-pulse rounded-full bg-green-500 px-2 py-0;
 }
 
 .pageTopSection {
-  @apply flex justify-between items-center mb-5;
+  @apply mb-5 flex items-center justify-between;
+}
+
+.content {
+  @apply flex flex-col gap-4;
+}
+
+.addPostCta {
+  @apply h-11 w-36 rounded-full md:h-14 md:w-48;
+}
+
+.addPostCtaIcon {
+  @apply h-9 rounded-full md:h-12 md:w-1/4;
 }

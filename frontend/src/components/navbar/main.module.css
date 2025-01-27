@@ -1,11 +1,19 @@
 .navbarContainer {
-  @apply flex justify-between items-center px-4 sm:px-8 py-3 shadow-lg sticky top-0 bg-white z-[2] h-20;
+  @apply sticky top-0 z-[2] flex h-20 items-center justify-between bg-white px-4 py-3 shadow-lg sm:px-8;
 }
 
 .navbarLinks {
-  @apply flex gap-3 items-center;
+  @apply flex items-center gap-3;
 }
 
 .loaderStyle {
   @apply h-1.5 w-1.5;
+}
+
+.navBarLink {
+  @apply mr-3 rounded-lg p-3 hover:bg-gray-100;
+}
+
+.underLineLink {
+  @apply underline;
 }

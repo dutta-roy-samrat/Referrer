@@ -1,8 +1,12 @@
 "use client";
 
-import { useAuthContext } from "@/contexts/auth";
-import styles from "./main.module.css";
 import Image from "next/image";
+
+import { useAuthContext } from "@/contexts/auth";
+
+import { cn } from "@/lib/utils";
+
+import styles from "./main.module.css";
 
 const Avatar = ({ avatarFallbackClass = "", avatarClass = "" }) => {
   const { data } = useAuthContext();
@@ -18,10 +22,10 @@ const Avatar = ({ avatarFallbackClass = "", avatarClass = "" }) => {
       alt="avatar"
       width={100}
       height={100}
-      className={`${styles.avatar} ${avatarClass}`}
+      className={cn(styles.avatar, avatarClass)}
     />
   ) : (
-    <div className={`${styles.avatarFallback} ${avatarFallbackClass}`}>
+    <div className={cn(styles.avatarFallback, avatarFallbackClass)}>
       {getAllWordInitializers()}
     </div>
   );

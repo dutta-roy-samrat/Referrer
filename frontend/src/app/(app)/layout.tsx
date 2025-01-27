@@ -1,7 +1,8 @@
 import Navbar from "@/components/navbar";
 
-import styles from "./main.module.css";
 import AuthProvider from "@/contexts/auth";
+
+import styles from "./main.module.css";
 
 export default function AppLayout({
   children,
@@ -11,7 +12,7 @@ export default function AppLayout({
   return (
     <AuthProvider>
       <Navbar />
-      <div className="p-6">{children}</div>
+      <div className={styles.layout}>{children}</div>
     </AuthProvider>
   );
 }

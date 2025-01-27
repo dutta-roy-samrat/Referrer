@@ -1,7 +1,7 @@
-const SpinnerLoader = () =>
-    <div
-        className="w-10 h-10 border-4 border-t-black border-gray-300 rounded-full animate-spin"
-    ></div>
+import { FC } from "react";
 
+import styles from "./main.module.css";
+
+const SpinnerLoader: FC = () => <div className={styles.spinnerLoader}></div>;
 
 export default SpinnerLoader;

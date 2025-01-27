@@ -1,41 +1,93 @@
 "use client";
 
+import {
+  ChangeEventHandler,
+  Dispatch,
+  ReactNode,
+  SetStateAction,
+  useRef,
+  useState,
+} from "react";
+import { useRouter } from "next/navigation";
 import { FieldValues, SubmitHandler, useForm } from "react-hook-form";
-import styles from "./main.module.css";
-import { ChangeEventHandler, useRef, useState } from "react";
+
 import ChipsInput from "@/components/ui/chips-input";
+import StyledButton from "@/components/ui/button/styled-button";
+import DatePicker from "@/components/ui/date-picker";
+
 import { axiosInstance } from "@/services/axios";
 import { useAuthContext } from "@/contexts/auth";
+import { onErrorToastMsg, onSuccessToastMsg } from "@/services/toastify";
 
-const ReferralPostDialogContent = () => {
+import { formDataSerializer } from "@/helpers/serializers";
+import { getInputClass } from "@/helpers/utils";
+import { cn } from "@/lib/utils";
+
+import styles from "./main.module.css";
+
+const ReferralPostDialogContent = ({
+  setIsFormDialogOpen,
+}: {
+  setIsFormDialogOpen?: Dispatch<SetStateAction<boolean>>;
+}) => {
+  const { push } = useRouter();
   const { register, setValue, formState, handleSubmit } = useForm();
-  const { data: userData } = useAuthContext();
+  const { data: userData, isAuthenticated } = useAuthContext();
   const { isSubmitting, errors } = formState;
+
+  const [skills, setSkills] = useState<string[]>([]);
+  const [expiryDate, setExpiryDate] = useState<Date>();
+  const [skillsError, setSkillsError] = useState("");
+  const [expiryDateError, setExpiryDateError] = useState("");
+
+  const skillsRef = useRef<HTMLInputElement>(null);
+  const expiryDateInputRef = useRef<HTMLButtonElement>(null);
+
   const handleInput: ChangeEventHandler<HTMLInputElement> = (e) => {
     const inputFieldValue = e.target.value;
     if (e.target.type === "number") {
       if (inputFieldValue < e.target.min) {
         return setValue(e.target.name, 0);
       }
-      return setValue(e.target.name, Math.floor(Number(inputFieldValue)));
+      return setValue(e.target.name, Math.floor(Number(inputFieldValue)), {
+        shouldValidate: true,
+      });
     }
   };
-  const [skills, setSkills] = useState<string[]>([]);
-  const skillsRef = useRef<HTMLInputElement>(null);
-  const [skillsError, setSkillsError] = useState("");
-  
+
   const onSubmit: SubmitHandler<FieldValues> = (data) => {
+    setSkillsError("");
+    if (!isAuthenticated) {
+      push("/login");
+    }
+    const dataToBeSubmitted = {
+      ...data,
+      skills,
+      expiryDate: expiryDate?.toLocaleDateString("en-ca", {
+        timeZone: "UTC",
+      }),
+      posted_by: userData.id,
+    };
+    const formData = formDataSerializer(dataToBeSubmitted);
+    return axiosInstance
+      .post("/posts/", formData)
+      .then(({ data }) => {
+        onSuccessToastMsg(data.message);
+        setIsFormDialogOpen?.(false);
+      })
+      .catch((err) => onErrorToastMsg(err.message));
+  };
+
+  const handleSubmitBtnClick = () => {
     if (skills.length === 0 && skillsRef.current) {
       setSkillsError("Minimum of one skill must be added.");
-      return skillsRef.current.focus();
+      skillsRef.current.focus();
     }
-    const dataToBeSubmitted = { ...data, skills, posted_by: userData.id };
-
-    const formData = new FormData();
-    for (const key in dataToBeSubmitted) {
-      formData.append(key, dataToBeSubmitted[key]);
+    if (!expiryDate && expiryDateInputRef.current) {
+      setExpiryDateError("Add an expiry date for the opening.");
+      expiryDateInputRef.current.focus();
     }
-    return axiosInstance.post("/posts/", formData);
+    return;
   };
 
   return (
@@ -45,46 +97,73 @@ const ReferralPostDialogContent = () => {
       onSubmit={handleSubmit(onSubmit)}
     >
       <div className={styles.fieldContainer}>
-        <label htmlFor="company_name" className={styles.labelContainer}>
+        <label htmlFor="companyName" className={styles.labelContainer}>
           Company Name
         </label>
         <input
-          id="company_name"
+          id="companyName"
           placeholder="ABC"
-          {...register("company_name", {
+          {...register("companyName", {
             required: "Company Name is a required field",
           })}
-          className={styles.inputContainer}
+          className={getInputClass({
+            className: styles.inputContainer,
+            error: errors.companyName,
+          })}
         />
-        {errors.company_name && <p>{errors.company_name.message}</p>}
+        {errors.companyName && (
+          <p className={styles.error}>
+            {errors.companyName.message as ReactNode}
+          </p>
+        )}
       </div>
       <div className={styles.fieldContainer}>
-        <label htmlFor="job_title" className={styles.labelContainer}>
+        <label htmlFor="jobTitle" className={styles.labelContainer}>
           Job Title
         </label>
         <input
-          id="job_title"
+          id="jobTitle"
           placeholder="Write the role here"
-          {...register("job_title", {
+          {...register("jobTitle", {
             required: "Job Title is a required field",
+            maxLength: {
+              value: 25,
+              message: "Max Limit 25 characters including space",
+            },
           })}
-          className={styles.inputContainer}
+          className={getInputClass({
+            className: styles.inputContainer,
+            error: errors.jobTitle,
+          })}
         />
-        {errors.job_title && <p>{errors.job_title.message}</p>}
+        {errors.jobTitle && (
+          <p className={styles.error}>{errors.jobTitle.message as ReactNode}</p>
+        )}
       </div>
       <div className={styles.fieldContainer}>
-        <label htmlFor="job_description" className={styles.labelContainer}>
+        <label htmlFor="jobDescription" className={styles.labelContainer}>
           Job Description
         </label>
         <textarea
-          id="job_description"
+          id="jobDescription"
           placeholder="Write the requirement related to job here"
-          className={`${styles.inputContainer} ${styles.textareaInput}`}
-          {...register("job_description", {
+          className={getInputClass({
+            className: cn(styles.inputContainer, styles.textareaInput),
+            error: errors.companyName,
+          })}
+          {...register("jobDescription", {
             required: "Job Description is a required field",
+            maxLength: {
+              value: 25,
+              message: "Max Limit 25 characters including space",
+            },
           })}
         />
-        {errors.job_description && <p>{errors.job_description.message}</p>}
+        {errors.jobDescription && (
+          <p className={styles.error}>
+            {errors.jobDescription.message as ReactNode}
+          </p>
+        )}
       </div>
       <div className={styles.fieldContainer}>
         <label htmlFor="experience" className={styles.labelContainer}>
@@ -93,7 +172,10 @@ const ReferralPostDialogContent = () => {
         <input
           id="experience"
           placeholder="3"
-          className={styles.inputContainer}
+          className={getInputClass({
+            className: styles.inputContainer,
+            error: errors.experience,
+          })}
           {...register("experience", {
             required: "Please share the experience requirements for the job!",
           })}
@@ -101,7 +183,11 @@ const ReferralPostDialogContent = () => {
           min={0}
           onChange={handleInput}
         />
-        {errors.experience && <p>{errors.experience.message}</p>}
+        {errors.experience && (
+          <p className={styles.error}>
+            {errors.experience.message as ReactNode}
+          </p>
+        )}
       </div>
       <div className={styles.fieldContainer}>
         <label htmlFor="salary" className={styles.labelContainer}>
@@ -110,7 +196,10 @@ const ReferralPostDialogContent = () => {
         <input
           id="salary"
           placeholder="12"
-          className={styles.inputContainer}
+          className={getInputClass({
+            className: styles.inputContainer,
+            error: errors.salary,
+          })}
           {...register("salary", {
             required: "Please share the salary details of the job!",
           })}
@@ -118,30 +207,43 @@ const ReferralPostDialogContent = () => {
           min={0}
           onChange={handleInput}
         />
-        {errors.salary && <p>{errors.salary.message}</p>}
+        {errors.salary && (
+          <p className={styles.error}>{errors.salary.message as ReactNode}</p>
+        )}
       </div>
       <div className={styles.fieldContainer}>
-        <label htmlFor="expiry_date" className={styles.labelContainer}>
+        <label htmlFor="expiryDate" className={styles.labelContainer}>
           Expiry Date
         </label>
-        <input
-          id="expiry_date"
-          className={styles.inputContainer}
-          {...register("expiry_date", {
-            required: "Please mention the date of expiry for the application!",
+        <DatePicker
+          id="expiryDate"
+          className={getInputClass({
+            className: styles.inputContainer,
+            error: !!expiryDateError && !expiryDate,
           })}
-          type="date"
+          date={expiryDate}
+          setDate={setExpiryDate}
+          ref={expiryDateInputRef}
         />
-        {errors.expiry_date && <p>{errors.expiry_date.message}</p>}
+        {expiryDateError && !expiryDate && (
+          <p className={styles.error}>{expiryDateError}</p>
+        )}
       </div>
       <div className={styles.fieldContainer} ref={skillsRef}>
         <label htmlFor="skills" className={styles.labelContainer}>
           Skills
         </label>
-        <div className="col-span-2 justify-end">
-          <ChipsInput chips={skills} setChips={setSkills} ref={skillsRef} />
+        <div className={styles.skillsInputContainer}>
+          <ChipsInput
+            chips={skills}
+            setChips={setSkills}
+            ref={skillsRef}
+            checkErrors={!!skillsError}
+          />
         </div>
-        {skillsError && <p>{skillsError}</p>}
+        {skillsError && !skills.length && (
+          <p className={styles.error}>{skillsError}</p>
+        )}
       </div>
       <div className={styles.fieldContainer}>
         <label htmlFor="location" className={styles.labelContainer}>
@@ -152,19 +254,29 @@ const ReferralPostDialogContent = () => {
           placeholder="Bangalore"
           {...register("location", {
             required: "Job Location is a required field",
+            maxLength: {
+              value: 15,
+              message: "Max Limit 15 characters including space",
+            },
           })}
-          className={styles.inputContainer}
+          className={getInputClass({
+            className: styles.inputContainer,
+            error: errors.location,
+          })}
         />
-        {errors.location && <p>{errors.location.message}</p>}
+        {errors.location && (
+          <p className={styles.error}>{errors.location.message as ReactNode}</p>
+        )}
       </div>
-      <button
+      <StyledButton
         className={styles.formSubmitBtn}
         disabled={isSubmitting}
-        type="submit"
         form="post-referral"
+        loading={isSubmitting}
+        onClick={handleSubmitBtnClick}
       >
         Post
-      </button>
+      </StyledButton>
     </form>
   );
 };

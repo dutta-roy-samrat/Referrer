@@ -9,58 +9,80 @@ import {
   SheetClose,
   SheetFooter,
 } from "@/components/ui/sheet";
-import { getResponsiveUserLinks, USER_SHEET_LINKS } from "./constants";
-import { Separator } from "../ui/separator";
-import Avatar from "../avatar";
-import LogoutButton from "../ui/buttons/logout";
+import { Separator } from "@/components/ui/separator";
+import LogoutButton from "@/components/ui/button/logout";
+import HamburgerButton from "@/components/ui/button/hamburger";
+import StyledLink from "@/components/ui/link/styled-link";
+import Avatar from "@/components/avatar";
+
 import { useCurrentDeviceContext } from "@/contexts/device";
-import HamburgerButton from "../ui/buttons/hamburger";
 import { useAuthContext } from "@/contexts/auth";
-import { useRouter } from "next/navigation";
+
+import { getResponsiveUserLinks, USER_SHEET_LINKS } from "./constants";
+
+import styles from "./main.module.css";
 
 const UserSheet = () => {
   const { isAuthenticated, data } = useAuthContext();
   const { isResponsive } = useCurrentDeviceContext();
-  const { push } = useRouter();
+
   const userSheeLinks = isResponsive
     ? getResponsiveUserLinks({ isAuthenticated })
     : USER_SHEET_LINKS;
+
   const renderSheetLinks = () =>
     userSheeLinks.map(({ url, label }) => {
-      if (!url) return <div className="text-gray-400">{label}</div>;
+      if (!url)
+        return (
+          <div className={styles.linkLabel} key={label}>
+            {label}
+          </div>
+        );
       return (
-        <SheetClose
-          className="p-3 text-left hover:rounded-md hover:bg-gray-100"
-          onClick={() => push(url)}
-          key={label}
-        >
-          {label}
+        <SheetClose className={styles.sheetClose} key={label} asChild>
+          <StyledLink href={url}>{label}</StyledLink>
         </SheetClose>
       );
     });
+
+  const renderAvatarWebView = () => (
+    <div className={styles.sheetTitleContainer}>
+      <div className={styles.sheetTitleLeftContent}>
+        <div>Account</div>
+        <div className={styles.userEmail}>{data?.email}</div>
+      </div>
+      <Avatar />
+    </div>
+  );
+
+  const renderAvatarResponsiveView = () => (
+    <div className={styles.sheetResponsiveTitleContainer}>
+      <div className={styles.sheetTitleLeftContent}>
+        <div>Account</div>
+        <Avatar />
+      </div>
+      <div className={styles.responsiveUserEmail}>{data?.email}</div>
+    </div>
+  );
+
   return (
     <Sheet>
       <SheetTrigger>
-        {!isResponsive ? <Avatar /> : <HamburgerButton />}
+        {isResponsive ? <HamburgerButton /> : <Avatar />}
       </SheetTrigger>
-      <SheetContent className="overflow-y-auto">
+      <SheetContent className={styles.sheetContent}>
         <SheetHeader>
           <SheetTitle>
-            <div className="flex items-start justify-between pb-10 pt-4">
-              <div className="flex flex-col items-start justify-between gap-3">
-                <div>Account</div>
-                <div className="font-extralight break-all">{data?.email}</div>
-              </div>
-              <Avatar />
-            </div>
+            {isResponsive
+              ? renderAvatarResponsiveView()
+              : renderAvatarWebView()}
           </SheetTitle>
         </SheetHeader>
-
         <Separator />
-        <section className="flex flex-col gap-3 pt-10 text-xl">
+        <section className={styles.sheetLinksContainer}>
           {renderSheetLinks()}
         </section>
-        <SheetFooter className="pt-10">
+        <SheetFooter className={styles.sheetFooter}>
           <LogoutButton />
         </SheetFooter>
       </SheetContent>

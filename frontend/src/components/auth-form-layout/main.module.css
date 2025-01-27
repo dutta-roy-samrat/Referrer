@@ -1,0 +1,7 @@
+.card {
+  @apply flex w-full flex-col items-center justify-center border-none bg-black py-10 lg:w-auto lg:border-white lg:bg-white;
+}
+
+.cardContent {
+  @apply w-full py-0 lg:w-auto;
+}

@@ -1,0 +1,11 @@
+.dialogContentContainer {
+  @apply relative mt-4 flex w-full flex-col items-center bg-gray-300;
+}
+
+.saveBtn {
+  @apply mt-4 rounded-md bg-gray-700 px-4 py-2 text-white hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2;
+}
+
+.cropperContainer {
+  @apply relative h-[400px] w-full;
+}

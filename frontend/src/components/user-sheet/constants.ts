@@ -4,31 +4,39 @@ export const USER_SHEET_LINKS = [
     label: "Profile",
   },
   {
-    url: "/change-password/",
+    url: "/reset-password/",
     label: "Change Password",
   },
 ];
 
-
-export const getResponsiveUserLinks = ({ isAuthenticated }) => [
+export const getResponsiveUserLinks = ({
+  isAuthenticated,
+}: {
+  isAuthenticated: boolean;
+}) => [
   {
     label: "Account Settings",
-    url: ""
+    url: "",
   },
   ...USER_SHEET_LINKS,
   {
     label: " Quick Links",
-    url: ""
+    url: "",
   },
   {
     url: "/feed",
     label: "Feed",
   },
-  ...isAuthenticated ? [{
-    url: "/",
-    label: "Dashboard",
-  }, {
-    url: "/my-posts",
-    label: "My Posts",
-  }] : []
-]
+  ...(isAuthenticated
+    ? [
+        {
+          url: "/",
+          label: "Dashboard",
+        },
+        {
+          url: "/my-posts",
+          label: "My Posts",
+        },
+      ]
+    : []),
+];

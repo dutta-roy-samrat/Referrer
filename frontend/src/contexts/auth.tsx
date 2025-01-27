@@ -3,7 +3,7 @@
 import {
   ApolloQueryResult,
   OperationVariables,
-  useQuery,
+  useLazyQuery,
 } from "@apollo/client";
 import {
   createContext,
@@ -13,10 +13,14 @@ import {
   SetStateAction,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useState,
 } from "react";
+
 import { fetchBasicUserInfo } from "@/graphql/query/basic-user-details";
+
+import { MEDIA_LIBRARY_URL } from "@/constants/environment-variables";
 
 export type AuthDataType = {
   firstName: string;
@@ -69,49 +73,51 @@ export const useAuthContext = () => useContext(AuthContext);
 const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
   const [authenticationData, setAuthenticationData] =
     useState<AuthProps>(DEFAULT_AUTH_VALUE);
-
-  const { refetch } = useQuery(fetchBasicUserInfo, {
-    skip: authenticationData.isAuthenticated,
+  const [fetchAuthData] = useLazyQuery(fetchBasicUserInfo, {
     ssr: true,
     onError: (error) => {
       setAuthenticationData({
         ...DEFAULT_AUTH_VALUE,
         isLoading: false,
       });
-      if (error?.graphQLErrors) {
-        error.graphQLErrors.forEach((graphQLError) =>
-          console.error("GraphQL error:", graphQLError.message),
-        );
-      }
+      error?.graphQLErrors.forEach((graphQLError) =>
+        console.error("GraphQL error:", graphQLError.message),
+      );
     },
     onCompleted: (data) => {
-      setAuthenticationData({
-        isAuthenticated: true,
-        data: {
-          ...DEFAULT_AUTH_VALUE.data,
-          ...data.getUserDetails,
-          profileImage: data.getUserDetails.profileImage
-            ? `http://localhost:8000/media/${data.getUserDetails.profileImage}`
-            : "",
-        },
-        isLoading: false,
-      });
+      if (data?.getUserDetails) {
+        setAuthenticationData({
+          isAuthenticated: true,
+          data: {
+            ...DEFAULT_AUTH_VALUE.data,
+            ...data.getUserDetails,
+            profileImage: data.getUserDetails.profileImage
+              ? `${MEDIA_LIBRARY_URL}${data.getUserDetails.profileImage}`
+              : "",
+          },
+          isLoading: false,
+        });
+      }
     },
+    fetchPolicy: "cache-and-network",
   });
 
-  const resetAuthData = useCallback(
-    () => setAuthenticationData(DEFAULT_AUTH_VALUE),
-    [],
-  );
+  const resetAuthData = useCallback(() => {
+    setAuthenticationData({ ...DEFAULT_AUTH_VALUE, isLoading: false });
+  }, []);
+
+  useEffect(() => {
+    fetchAuthData();
+  }, []);
 
   const value = useMemo(
     () => ({
       ...authenticationData,
       resetAuthData,
       setAuthenticationData,
-      refetchUserDetails: refetch,
+      refetchUserDetails: fetchAuthData,
     }),
-    [authenticationData, resetAuthData, setAuthenticationData],
+    [authenticationData],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

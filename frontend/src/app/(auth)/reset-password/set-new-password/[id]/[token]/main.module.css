@@ -1,0 +1,7 @@
+.headerText {
+  @apply mb-4 text-center text-2xl font-bold text-white;
+}
+
+.instruction {
+  @apply mb-4 px-6 text-center text-sm text-white sm:px-2;
+}

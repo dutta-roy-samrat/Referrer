@@ -1,0 +1,24 @@
+.fallbackContent,
+.contentLoader {
+  @apply flex h-64 items-center justify-center rounded-md border p-3;
+}
+
+.contentLoaderAnimation {
+  @apply animate-bounce;
+}
+
+.scrollArea {
+  @apply whitespace-nowrap rounded-md border;
+}
+
+.scrollAreaContentContainer {
+  @apply flex w-max space-x-4 p-4;
+}
+
+.articleContainer {
+  @apply px-4 pb-5 pt-14 sm:px-8;
+}
+
+.articleHeaderContainer {
+  @apply mb-4 flex items-center justify-between;
+}

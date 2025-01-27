@@ -4,7 +4,8 @@ import Image from "next/image";
 import { DialogTrigger } from "@/components/ui/dialog";
 import ImageCropperModalContent from "@/components/account-settings/profile/image-cropper";
 import CustomFileInput from "@/components/ui/custom-file-input";
-import { FormState } from "..";
+
+import styles from "./main.module.css";
 
 interface ProfileImageUploaderProps {
   imageSrc: string;
@@ -55,20 +56,18 @@ const ProfileImageUploader: React.FC<ProfileImageUploaderProps> = ({
   };
 
   return (
-    <div className="flex flex-col items-center justify-center gap-4">
+    <div className={styles.uploaderContainer}>
       <div>
         {profileImage ? (
           <Image
             src={profileImage}
             alt="Profile"
-            className="flex h-44 w-44 items-center justify-center rounded-full"
+            className={styles.profileImage}
             width="100"
             height="100"
           />
         ) : (
-          <div className="flex h-44 w-44 items-center justify-center rounded-full bg-gray-400">
-            No Image
-          </div>
+          <div className={styles.noImage}>No Image</div>
         )}
       </div>
       <CustomFileInput
@@ -76,19 +75,16 @@ const ProfileImageUploader: React.FC<ProfileImageUploaderProps> = ({
         handleInputChange={handleImageUpload}
         label={
           <DialogTrigger>
-            <label
-              htmlFor="profileImage"
-              className="rounded-lg bg-black p-2 text-white"
-            >
+            <label htmlFor="profileImage" className={styles.dialogTrigger}>
               Choose a file
             </label>
           </DialogTrigger>
         }
         inputId="profileImage"
-        className="flex-col items-start justify-center gap-3"
+        className={styles.fileInput}
         inputProps={{ accept: "image/*" }}
       />
-      <div className="flex gap-4">
+      <div className={styles.imageCustomizationBtnGroup}>
         <button onClick={handleImageRemove}>Remove</button>
         {profileImage && (
           <DialogTrigger onClick={handleImageEdit}>Edit</DialogTrigger>

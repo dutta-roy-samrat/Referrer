@@ -1,0 +1,39 @@
+.sheetTitleContainer {
+  @apply flex items-start justify-between pb-10 pt-4;
+}
+
+.sheetTitleLeftContent {
+  @apply flex flex-col items-start justify-between gap-3;
+}
+
+.userEmail {
+  @apply break-all font-extralight;
+}
+
+.sheetLinksContainer {
+  @apply flex flex-col gap-3 pt-10 text-xl;
+}
+
+.sheetFooter {
+  @apply pt-10;
+}
+
+.linkLabel {
+  @apply text-gray-400;
+}
+
+.sheetClose {
+  @apply p-3 text-left hover:rounded-md hover:bg-gray-100;
+}
+
+.sheetContent {
+  @apply overflow-y-auto;
+}
+
+.sheetResponsiveTitleContainer {
+  @apply flex flex-col items-center justify-center gap-1 pb-4 pt-4;
+}
+
+.responsiveUserEmail {
+  @apply text-sm font-extralight;
+}

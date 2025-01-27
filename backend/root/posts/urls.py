@@ -9,4 +9,5 @@ urlpatterns = [
     path("<int:id>/", PostsView.as_view()),
     path("events/", include(django_eventstream.urls), {"channels": ["post"]}),
     path("applied-to/", AppliedPostsView.as_view()),
+    path("delete/<int:id>", MyPostsView.as_view()),
 ]

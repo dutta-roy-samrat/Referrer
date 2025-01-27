@@ -1,5 +1,5 @@
-import { FC } from 'react';
-import { FieldError, Merge, FieldErrorsImpl } from 'react-hook-form';
+import { FC, ReactNode } from "react";
+import { FieldError, Merge, FieldErrorsImpl } from "react-hook-form";
 
 interface ErrorMessageProps {
   error?: string | FieldError | Merge<FieldError, FieldErrorsImpl<any>>;
@@ -8,9 +8,7 @@ interface ErrorMessageProps {
 
 const ErrorMessage: FC<ErrorMessageProps> = ({ error, className }) => {
   if (!error) return null;
-  
-  const message = typeof error === 'string' ? error : error.message;
-  return <p className={className}>{message}</p>;
+  return <p className={className}>{error as string}</p>;
 };
 
-export default ErrorMessage; 
+export default ErrorMessage;

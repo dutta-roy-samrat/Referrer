@@ -1,14 +1,15 @@
-import { Suspense } from "react";
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 
-import ScrollToTop from "@/components/scroll-to-top";
-import CurrentDeviceContextProvider from "@/contexts/device";
 import { ToastContainer } from "react-toastify";
 
-import "./globals.css";
+import ScrollToTop from "@/components/scroll-to-top";
+import CurrentDeviceContextProvider from "@/contexts/device";
 import ReactQueryWrapper from "@/services/react-query";
 import ApolloGraphqlWrapper from "@/services/apollo-graphql";
+
+import styles from "./main.module.css";
+import "./globals.css";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -35,16 +36,16 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="h-full">
+    <html lang="en" className={styles.html}>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} ${styles.body}`}
       >
         <ToastContainer />
         <ApolloGraphqlWrapper>
           <ReactQueryWrapper>
             <CurrentDeviceContextProvider>
               <ScrollToTop />
-              <div className="h-full w-full">{children}</div>
+              <div className={styles.content}>{children}</div>
             </CurrentDeviceContextProvider>
           </ReactQueryWrapper>
         </ApolloGraphqlWrapper>

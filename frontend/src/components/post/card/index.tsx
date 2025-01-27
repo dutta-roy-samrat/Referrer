@@ -1,4 +1,5 @@
-import { FC, ReactNode } from "react";
+import { FC } from "react";
+
 import {
   Card,
   CardContent,
@@ -10,13 +11,16 @@ import SackDollarIcon from "@/components/ui/icons/sack-dollar";
 import UserTieIcon from "@/components/ui/icons/user-tie";
 import ClockIcon from "@/components/ui/icons/clock";
 import LocationIcon from "@/components/ui/icons/location";
-import DeleteButton from "@/components/ui/buttons/delete";
-import { PostProps } from "@/components/post/card/types";
+import DeleteButton from "@/components/ui/button/delete";
+import ArrowOnHover from "@/components/ui/interactive-arrow-on-hover";
+import JobField from "@/components/post/shared/job-field";
+import Skills from "@/components/post/shared/skills";
+import { PostProps } from "@/components/post/types";
 
-import JobField from "../shared/job-field";
-import Skills from "../shared/skills";
-import ArrowOnHover from "@/components/ui/arrow-on-hover";
-import Link from "next/link";
+import styles from "./main.module.css";
+import { axiosInstance } from "@/services/axios";
+import { onErrorToastMsg, onSuccessToastMsg } from "@/services/toastify";
+import { AxiosError } from "axios";
 
 const PostCard: FC<PostProps> = ({
   showDeleteBtn = false,
@@ -29,17 +33,31 @@ const PostCard: FC<PostProps> = ({
   location,
   id,
 }) => {
+  const handleDeleteClick = async () => {
+    try {
+      const res = await axiosInstance.delete(`/posts/delete/${id}`);
+      onSuccessToastMsg(res.data?.message);
+    } catch (err) {
+      const error = err as AxiosError;
+      onErrorToastMsg((error?.response?.data as { message: string })?.message);
+    }
+  };
   return (
     <Card>
-      <CardHeader className="flex-row items-start justify-between px-6 py-4">
-        <div className="flex flex-col">
-          <CardTitle className="text-lg font-semibold">{job_title}</CardTitle>
-          <p className="text-gray-500">{company_name}</p>
+      <CardHeader className={styles.cardHeader}>
+        <div className={styles.cardTitleContainer}>
+          <CardTitle className={styles.jobTitle}>{job_title}</CardTitle>
+          <p className={styles.companyName}>{company_name}</p>
         </div>
-        {showDeleteBtn && <DeleteButton />}
+        {showDeleteBtn && (
+          <DeleteButton
+            className={styles.deleteCta}
+            onClick={handleDeleteClick}
+          />
+        )}
       </CardHeader>
 
-      <CardContent className="space-y-4 px-6 py-4">
+      <CardContent className={styles.cardContent}>
         <JobField icon={<LocationIcon />} text={location} />
         <JobField
           icon={<SackDollarIcon alt="salary" />}
@@ -53,12 +71,11 @@ const PostCard: FC<PostProps> = ({
         {skills_display?.length ? <Skills skills={skills_display} /> : null}
       </CardContent>
 
-      <CardFooter className="flex justify-center px-6 py-4 sm:justify-end">
+      <CardFooter className={styles.cardFooter}>
         <ArrowOnHover
           text="Check Description"
           href={`/post/${id}`}
-          className="w-40"
-          Component={Link}
+          className={styles.checkDescriptionCta}
         />
       </CardFooter>
     </Card>

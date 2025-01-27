@@ -1,3 +1,31 @@
-.contentFieldContainer {
-  @apply flex gap-4 justify-start items-center flex-wrap;
+.cardHeader {
+  @apply flex-row items-start justify-between px-6 py-4;
+}
+
+.cardTitleContainer {
+  @apply flex flex-col;
+}
+
+.jobTitle {
+  @apply text-lg font-semibold;
+}
+
+.companyName {
+  @apply text-gray-500;
+}
+
+.cardContent {
+  @apply space-y-4 px-6 py-4;
+}
+
+.cardFooter {
+  @apply flex justify-center px-6 py-4 sm:justify-end;
+}
+
+.checkDescriptionCta {
+  @apply w-56;
+}
+
+.deleteCta {
+  @apply ml-5;
 }

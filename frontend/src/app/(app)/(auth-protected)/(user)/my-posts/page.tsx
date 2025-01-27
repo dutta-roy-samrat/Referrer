@@ -1,10 +1,12 @@
+import { FC } from "react";
+
 import Feed from "@/components/feed";
 import styles from "./main.module.css";
 
 import { axiosServerInstance } from "@/services/axios";
 import AddReferralModal from "@/components/modals/add-referral-modal";
 
-const MyPosts = async () => {
+const MyPosts: FC = async () => {
   try {
     const res = await axiosServerInstance.get("/posts/my-posts?start_from=0");
     return (
@@ -13,8 +15,8 @@ const MyPosts = async () => {
           <header className={styles.myPostsHeader}>My Posts</header>
           <AddReferralModal />
         </div>
-        <main className="flex flex-col gap-4">
-          <Feed postList={res.data} />
+        <main className={styles.content}>
+          <Feed postList={res.data} showDeleteBtn/>
         </main>
       </div>
     );

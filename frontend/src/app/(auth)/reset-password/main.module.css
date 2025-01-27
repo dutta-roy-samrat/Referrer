@@ -1,3 +1,7 @@
 .loginLink {
-    @apply text-center text-white hover:underline;
-  }
+  @apply text-center text-white hover:underline;
+}
+
+.headerText {
+  @apply text-center text-2xl font-bold text-white;
+}

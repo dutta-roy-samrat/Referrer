@@ -1,19 +1,22 @@
-import Link from "next/link";
+import { FC } from "react";
 
 import AuthFormLayout from "@/components/auth-form-layout";
 import SignUpForm from "@/components/form/sign-up";
 
-const SignUp = () => (
+import styles from "./main.module.css";
+import StyledLink from "@/components/ui/link/styled-link";
+
+const SignUp: FC = () => (
   <>
-    <div className="text-white font-bold text-2xl">Sign up to Referrer</div>
+    <header className={styles.headerText}>Sign up to Referrer</header>
     <AuthFormLayout>
       <SignUpForm />
     </AuthFormLayout>
-    <div className="text-white">
+    <div className={styles.loginText}>
       Have an account?{" "}
-      <Link href="/login" className="underline">
+      <StyledLink href="/login" type="underlined">
         Log In
-      </Link>
+      </StyledLink>
     </div>
   </>
 );

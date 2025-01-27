@@ -1,11 +1,20 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { axiosServerInstance } from "./services/axios";
+import { AUTH_PAGES } from "./constants/app-defaults";
 
 export async function middleware(request: NextRequest) {
-  console.log(request.nextUrl.pathname);
+  const refreshToken = request.cookies.get("refresh");
+  // redirection logic for auth pages
+  if (AUTH_PAGES.includes(request.nextUrl.pathname)) {
+    if (refreshToken) {
+      return NextResponse.redirect(new URL("/", request.url));
+    }
+    return NextResponse.next();
+  }
+
+  // redirection logic for auth protected pages
   try {
-    const refreshToken = request.cookies.get("refresh");
     if (!refreshToken) {
       throw "No Refresh Token present in cookie header";
     }
@@ -17,5 +26,12 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/", "/applied-posts", "/profile", "/my-posts"],
+  matcher: [
+    "/",
+    "/applied-posts",
+    "/profile",
+    "/my-posts",
+    "/login",
+    "/sign-up",
+  ],
 };

@@ -97,4 +97,11 @@ body {
   body {
     @apply bg-background text-foreground;
   }
+
+  input[type="date"]::-webkit-datetime-edit {
+    background-color: #4CAF50; /* Green background */
+    color: white; /* White text color */
+    padding: 5px; /* Add some padding */
+    border-radius: 5px; 
+  }
 }

@@ -1,29 +1,25 @@
-import Link from "next/link";
-import { ReactNode } from "react";
+import { FC, ReactNode } from "react";
 
 import ReferrerLogo from "@/components/referrer-logo";
+import StyledLink from "@/components/ui/link/styled-link";
 
-const AuthLayout = ({ children }: { children: ReactNode }) => {
+import styles from "./main.module.css";
+
+const AuthLayout: FC<{ children: ReactNode }> = ({ children }) => {
   return (
-    <div className="grid lg:grid-cols-2 h-full w-full bg:black lg:bg-transparent">
-      <div className="flex justify-center items-center flex-col gap-5 bg-white text-black pt-24 pb-14">
-        <ReferrerLogo className="animate-fade-in" />
-        <div className="animate-forward-slide text-lg tracking-widest text-center font-extralight px-3">
+    <div className={styles.pageContainer}>
+      <div className={styles.leftContentContainer}>
+        <ReferrerLogo className={styles.logo} />
+        <div className={styles.motto}>
           Effortless Referrals, Endless Opportunities
         </div>
-        <Link
-          href="/feed"
-          className="text-white bg-black rounded-md py-2 px-3 tracking-widest animate-fade-in"
-        >
+        <StyledLink href="/feed" className={styles.animatedBtn}>
           Go Explore Our Feed
-        </Link>
+        </StyledLink>
       </div>
-
-      <div className="bg-black flex justify-center items-center flex-col gap-4  pt-10 pb-24">
-        {children}
-      </div>
+      <article className={styles.rightContentContainer}>{children}</article>
     </div>
-  )
-}
+  );
+};
 
 export default AuthLayout;

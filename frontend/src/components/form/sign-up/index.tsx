@@ -1,14 +1,21 @@
 "use client";
 
+import { ReactNode } from "react";
 import { FieldValues, SubmitHandler, useForm } from "react-hook-form";
+import { useRouter } from "next/navigation";
+
+import { useAuthContext } from "@/contexts/auth";
+import { useCurrentDeviceContext } from "@/contexts/device";
+
+import StyledButton from "@/components/ui/button/styled-button";
+
+import { formDataSerializer } from "@/helpers/serializers";
+
+import { axiosInstance } from "@/services/axios";
+
+import { onErrorToastMsg, onSuccessToastMsg } from "@/services/toastify";
 
 import { EMAIL_VALIDATOR_REGEX } from "@/constants/validators";
-
-import { ReactNode } from "react";
-import { useCurrentDeviceContext } from "@/contexts/device";
-import { axiosInstance } from "@/services/axios";
-import { useRouter } from "next/navigation";
-import { useAuthContext } from "@/contexts/auth";
 
 import styles from "./main.module.css";
 
@@ -20,11 +27,7 @@ const SignUpForm = () => {
   const { setAuthenticationData } = useAuthContext();
 
   const onSubmit: SubmitHandler<FieldValues> = (data) => {
-    const formData = new FormData();
-    for (const key in data) {
-      formData.append(key, data[key]);
-    }
-
+    const formData = formDataSerializer(data);
     axiosInstance
       .post("/auth/register/", formData)
       .then((res) => {
@@ -34,9 +37,13 @@ const SignUpForm = () => {
           isAuthenticated: is_authenticated,
           isLoading: false,
         });
+        onSuccessToastMsg("Successfully created a new user");
         push("/");
       })
-      .catch((error) => console.error("Error:", error));
+      .catch((error) => {
+        onErrorToastMsg(error.message);
+        console.error("Error:", error);
+      });
   };
 
   const getInputClassName = (errorField: string) =>
@@ -174,9 +181,13 @@ const SignUpForm = () => {
           </p>
         )}
       </div>
-      <button className={styles.signUpBtn} disabled={isSubmitting}>
+      <StyledButton
+        className={styles.signUpBtn}
+        disabled={isSubmitting}
+        loading={isSubmitting}
+      >
         Sign Up
-      </button>
+      </StyledButton>
     </form>
   );
 };

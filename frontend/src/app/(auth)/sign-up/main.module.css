@@ -1,0 +1,7 @@
+.headerText {
+  @apply text-2xl font-bold text-white;
+}
+
+.loginText {
+  @apply text-white;
+}

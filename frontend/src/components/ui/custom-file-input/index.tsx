@@ -1,5 +1,10 @@
-import { cn } from "@/lib/utils";
 import { FC, ReactNode } from "react";
+
+import StyledLink from "@/components/ui/link/styled-link";
+
+import { cn } from "@/lib/utils";
+
+import styles from "./main.module.css";
 
 type CustomFileInputProps = {
   label?: ReactNode;
@@ -29,17 +34,14 @@ const CustomFileInput: FC<CustomFileInputProps> = ({
       ? `${file?.name.slice(0, 15)}...`
       : file?.name;
   const renderAttachedFileUrl = () => (
-    <a href={fileUrl} target="_blank" rel="noopener noreferrer">
+    <StyledLink href={fileUrl} target="_blank">
       {selectedFileName}
-    </a>
+    </StyledLink>
   );
   return (
-    <div className={cn("flex items-center gap-2", className)}>
+    <div className={cn(styles.customFileInputContainer, className)}>
       {label || (
-        <label
-          htmlFor={inputId}
-          className="block cursor-pointer rounded border p-2 text-sm font-medium text-black"
-        >
+        <label htmlFor={inputId} className={styles.customFileInputLabel}>
           {labelText}
         </label>
       )}
@@ -47,20 +49,20 @@ const CustomFileInput: FC<CustomFileInputProps> = ({
         id={inputId}
         type="file"
         onChange={handleInputChange}
-        className="hidden"
+        className={styles.hiddenFileInput}
         {...inputProps}
       />
       {file?.name ? (
-        <div className="flex items-center gap-2 rounded bg-gray-200 px-2 text-sm text-black">
+        <div className={styles.selectionText}>
           {fileUrl && renderAttachedFileUrl()}
           {removeInput && (
-            <span onClick={removeInput} className="cursor-pointer text-red-500">
+            <span onClick={removeInput} className={styles.removeFileIcon}>
               &#x2715;
             </span>
           )}
         </div>
       ) : (
-        fileUrl && <span className="text-gray-500">No file chosen</span>
+        fileUrl && <span className={styles.noFileChosen}>No file chosen</span>
       )}
     </div>
   );

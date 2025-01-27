@@ -3,16 +3,30 @@ import {
   Dispatch,
   forwardRef,
   SetStateAction,
+  useMemo,
   useState,
 } from "react";
-import StyledButton from "../buttons/styled-button";
+import uniq from "lodash/uniq";
+import without from "lodash/without";
 
-const defaultArr: string[] = [];
+import StyledButton from "@/components/ui/button/styled-button";
+
+import { cn } from "@/lib/utils";
+
+import styles from "./main.module.css";
+import { getInputClass } from "@/helpers/utils";
+
 const ChipsInput = forwardRef<
   HTMLInputElement,
-  { chips?: string[]; setChips: Dispatch<SetStateAction<string[]>> }
->(({ chips = defaultArr, setChips }, ref) => {
+  {
+    chips?: string[];
+    setChips: Dispatch<SetStateAction<string[]>>;
+    checkErrors: boolean;
+  }
+>(({ chips = [], setChips, checkErrors = false }, ref) => {
   const [inputValue, setInputValue] = useState("");
+  const [isInputFocussed, setIsInputFocussed] = useState(false);
+
   const maxChips = 15;
 
   const handleInputChange: ChangeEventHandler<HTMLInputElement> = (event) => {
@@ -23,58 +37,74 @@ const ChipsInput = forwardRef<
         setInputValue("");
         return;
       }
-
-      const words = value.split(",");
-      const newChips = words.slice(0, -1);
-      const trimmedChips = newChips
-        .map((chip) => chip.trim())
-        .filter((chip) => chip && !chips.includes(chip));
+      const newChips = uniq(
+        value
+          .split(",")
+          .map((chip) => chip.trim())
+          .filter((chip) => chip && !chips.includes(chip)),
+      );
 
       setChips((prevChips) =>
-        [...prevChips, ...trimmedChips].slice(0, maxChips),
+        uniq([...prevChips, ...newChips]).slice(0, maxChips),
       );
-      return setInputValue("");
+      setInputValue("");
+    } else {
+      setInputValue(value);
     }
-    return setInputValue(value);
   };
 
   const handleDeleteChip = (chipToDelete: string) => {
-    setChips((prevChips) => prevChips.filter((chip) => chip !== chipToDelete));
+    setChips((prevChips) => without(prevChips, chipToDelete));
   };
+
+  const chipsList = useMemo(() => {
+    return chips.map((chip, index) => (
+      <div key={index} className={styles.chip}>
+        {chip}
+        <StyledButton
+          onClick={() => handleDeleteChip(chip)}
+          aria-label={`Delete ${chip}`}
+          className={styles.chipDeleteBtn}
+        >
+          &times;
+        </StyledButton>
+      </div>
+    ));
+  }, [chips]);
 
   return (
     <>
       <div
-        tabIndex={-1}
-        className="flex flex-wrap items-center rounded-lg border p-3 focus-within:border-2 focus-visible:border-2"
-        ref={ref}
+        className={getInputClass({
+          className: cn(
+            styles.defaultChipsInput,
+            isInputFocussed ? styles.focusedChipsInput : "",
+          ),
+          error: checkErrors && chips.length === 0,
+        })}
       >
-        {chips.map((chip, index) => (
-          <div
-            key={index}
-            className="m-1 flex items-center rounded-full bg-black px-4 py-2 text-sm font-medium text-white"
-          >
-            {chip}
-            <StyledButton
-              onClick={() => handleDeleteChip(chip)}
-              aria-label={`Delete ${chip}`}
-              className="ml-2 text-white hover:text-gray-200 focus:outline-none"
-            >
-              &times;
-            </StyledButton>
-          </div>
-        ))}
+        {chipsList}
         <input
           type="text"
           value={inputValue}
           onChange={handleInputChange}
           placeholder="Type here ..."
           disabled={chips.length >= maxChips}
-          className={`max-w-[140px] flex-1 border-none p-2 text-sm outline-none sm:max-w-full ${chips.length >= maxChips ? "bg-gray-200 text-gray-500" : "bg-white"}`}
+          className={cn(
+            styles.defaultTextInput,
+            chips.length >= maxChips
+              ? styles.diabledTextInput
+              : styles.enabledTextInput,
+          )}
+          ref={ref}
+          onFocus={() => setIsInputFocussed(true)}
+          onBlur={() => setIsInputFocussed(false)}
         />
       </div>
       <p
-        className={`mt-2 text-sm ${chips.length >= maxChips ? "text-red-500" : "text-gray-600"}`}
+        className={`${styles.inputStatusInfo} ${
+          chips.length >= maxChips ? styles.errorText : styles.skillsAddedText
+        }`}
       >
         {chips.length >= maxChips
           ? "Maximum chips reached. Remove a chip to add more."

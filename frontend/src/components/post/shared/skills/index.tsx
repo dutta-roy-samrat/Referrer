@@ -1,21 +1,22 @@
-import StarIcon from "@/components/ui/icons/star";
 import { FC } from "react";
 
-import styles from "@/components/post/card/main.module.css";
+import StarIcon from "@/components/ui/icons/star";
 
-const Skills: FC<{ skills: string[] }> = ({ skills }) => (
-  <div className={styles.contentFieldContainer}>
-    <StarIcon alt="skills" />
-    <div className="flex flex-wrap gap-2">
-      {skills.map((skill) => (
-        <span
-          key={skill}
-          className="rounded-full bg-black px-4 py-1 text-white"
-        >
-          {skill}
-        </span>
-      ))}
+import styles from "./main.module.css";
+
+const Skills: FC<{ skills: string[] }> = ({ skills }) => {
+  const renderSkills = () =>
+    skills.map((skill) => (
+      <span key={skill} className={styles.skillPill}>
+        {skill}
+      </span>
+    ));
+
+  return (
+    <div className={styles.contentFieldContainer}>
+      <StarIcon alt="skills" />
+      <div className={styles.skillsListContainer}>{renderSkills()}</div>
     </div>
-  </div>
-);
+  );
+};
 export default Skills;

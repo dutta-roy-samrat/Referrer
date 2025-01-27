@@ -1,19 +1,20 @@
-import Link from "next/link";
-
 import AuthFormLayout from "@/components/auth-form-layout";
 import LoginForm from "@/components/form/login";
+import StyledLink from "@/components/ui/link/styled-link";
+
+import styles from "./main.module.css";
 
 const Login = () => (
   <>
-    <div className="text-white font-bold text-2xl">Welcome Back</div>
+    <header className={styles.headerText}>Welcome Back</header>
     <AuthFormLayout>
       <LoginForm />
     </AuthFormLayout>
     <div className="text-white">
       Don't have an account?{" "}
-      <Link href="/sign-up" className="underline">
+      <StyledLink href="/sign-up" type="underlined">
         Sign Up
-      </Link>
+      </StyledLink>
     </div>
   </>
 );

@@ -1,0 +1,23 @@
+.pageContainer {
+  @apply grid h-full w-full bg-black lg:grid-cols-2 lg:bg-transparent;
+}
+
+.leftContentContainer {
+  @apply flex flex-col items-center justify-center gap-5 bg-white pb-14 pt-24 text-black;
+}
+
+.logo {
+  @apply animate-fade-in;
+}
+
+.motto {
+  @apply animate-forward-slide px-3 text-center text-lg font-extralight tracking-widest;
+}
+
+.animatedBtn {
+  @apply animate-fade-in rounded-md bg-black px-3 py-2 tracking-widest text-white;
+}
+
+.rightContentContainer {
+  @apply flex flex-col items-center justify-center gap-4 bg-black pb-24 pt-10;
+}

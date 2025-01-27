@@ -13,7 +13,7 @@
 }
 
 .signUpBtn {
-  @apply m-4 w-full justify-self-center rounded-full bg-black p-2 text-white lg:mt-5;
+  @apply m-4 w-full justify-self-center;
 }
 
 .nameFieldContainer {
@@ -29,4 +29,12 @@
 
 .disabledBtn {
   @apply bg-slate-600;
+}
+
+.pageTitle {
+  @apply my-5 text-3xl font-bold;
+}
+
+.formLayout {
+  @apply bg-white;
 }

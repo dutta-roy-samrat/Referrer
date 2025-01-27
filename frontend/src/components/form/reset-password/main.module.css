@@ -2,17 +2,17 @@
   @apply grid grid-cols-3 grid-rows-2 items-center lg:grid-rows-1;
 }
 .labelContainer {
-  @apply col-span-3 lg:col-span-1 text-white lg:text-black;
+  @apply col-span-3 text-white lg:col-span-1 lg:text-black;
 }
 .inputContainer {
-  @apply border border-white lg:border-black rounded-lg p-2 col-span-3 lg:col-span-2 text-white lg:text-black bg-black lg:bg-white focus-visible:outline-double;
+  @apply col-span-3 rounded-lg border border-white bg-black p-2 text-white focus-visible:outline-double lg:col-span-2 lg:border-black lg:bg-white lg:text-black;
 }
 .errorInput {
   @apply border-red-600 focus-visible:outline-none;
 }
 .error {
-  @apply text-red-600 justify-self-end row-span-1 col-span-3 mt-2;
+  @apply col-span-3 row-span-1 mt-2 justify-self-end text-red-600;
 }
 .submitBtn {
-  @apply bg-white lg:bg-black rounded-full text-black lg:text-white p-2 m-4 w-2/4 lg:w-full justify-self-center mt-10 col-span-3;
+  @apply col-span-3 m-4 mt-10 w-2/4 justify-self-center bg-white p-2 text-black lg:w-full lg:bg-black lg:text-white;
 }

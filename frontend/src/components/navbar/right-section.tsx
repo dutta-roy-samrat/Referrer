@@ -2,52 +2,61 @@
 
 import { FC } from "react";
 import { useAuthContext } from "@/contexts/auth";
-import Link from "next/link";
+import { usePathname } from "next/navigation";
+
+import { useCurrentDeviceContext } from "@/contexts/device";
 
 import UserSheet from "@/components/user-sheet";
 import NDotsLoader from "@/components/ui/loader/n-dots";
+import StyledLink from "@/components/ui/link/styled-link";
 
 import styles from "./main.module.css";
-import { useCurrentDeviceContext } from "@/contexts/device";
-import { usePathname } from "next/navigation";
 
 const NavRighSection: FC = () => {
   const { isAuthenticated, isLoading } = useAuthContext();
   const { isResponsive } = useCurrentDeviceContext();
   const pathname = usePathname();
+
   if (isLoading) return <NDotsLoader numOfDots={5} />;
-  const renderAuthenticatedLinks = () =>
+
+  const renderNavBarLink = (label: string, href: string) => (
+    <StyledLink
+      href={href}
+      className={`${styles.navBarLink} ${pathname === href ? styles.underLineLink : ""}`}
+    >
+      {label}
+    </StyledLink>
+  );
+
+  const renderWebAuthenticatedLinks = () =>
     isAuthenticated ? (
       <>
-        <Link
-          href="/"
-          className={`mr-3 rounded-lg p-3 hover:bg-gray-100 ${pathname === "/" ? "underline" : ""}`}
-        >
-          Dashboard
-        </Link>
+        {renderNavBarLink("Dashboard", "/")}
         <UserSheet />
       </>
     ) : (
-      <Link
-        className="rounded-full bg-black px-3 py-2 text-white hover:opacity-80"
-        href="/login"
-      >
+      <StyledLink type="primary" href="/login">
         Login
-      </Link>
+      </StyledLink>
     );
+
+  const renderResponsiveAuthenticatedLinks = () =>
+    isAuthenticated ? (
+      <UserSheet />
+    ) : (
+      <StyledLink type="primary" href="/login">
+        Login
+      </StyledLink>
+    );
+
   const renderWebView = () => (
     <div className={styles.navbarLinks}>
-      <Link
-        href="/feed"
-        className={`mr-3 rounded-lg p-3 hover:bg-gray-100 ${pathname === "/feed" ? "underline" : ""}`}
-      >
-        Feed
-      </Link>
-      {renderAuthenticatedLinks()}
+      {renderNavBarLink("Feed", "/feed")}
+      {renderWebAuthenticatedLinks()}
     </div>
   );
 
-  return !isResponsive ? renderWebView() : <UserSheet />;
+  return isResponsive ? renderResponsiveAuthenticatedLinks() : renderWebView();
 };
 
 export default NavRighSection;
