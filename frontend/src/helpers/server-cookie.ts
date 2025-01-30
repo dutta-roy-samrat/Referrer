@@ -2,7 +2,7 @@
 
 import { cookies } from "next/headers";
 
-export const getAuthCookieHeader = async() => {
+export const getAuthCookieHeader = async () => {
   const cookieStore = await cookies();
   const accessCookieValue = cookieStore.get("access")?.value;
   const refreshCookieValue = cookieStore.get("refresh")?.value;

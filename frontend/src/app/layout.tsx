@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 
@@ -44,7 +45,9 @@ export default function RootLayout({
         <ApolloGraphqlWrapper>
           <ReactQueryWrapper>
             <CurrentDeviceContextProvider>
-              <ScrollToTop />
+              <Suspense>
+                <ScrollToTop />
+              </Suspense>
               <div className={styles.content}>{children}</div>
             </CurrentDeviceContextProvider>
           </ReactQueryWrapper>

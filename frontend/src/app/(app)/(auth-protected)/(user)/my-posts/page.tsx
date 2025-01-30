@@ -1,10 +1,13 @@
 import { FC } from "react";
 
 import Feed from "@/components/feed";
-import styles from "./main.module.css";
+import AddReferralModal from "@/components/modals/add-referral-modal";
 
 import { axiosServerInstance } from "@/services/axios";
-import AddReferralModal from "@/components/modals/add-referral-modal";
+
+import styles from "./main.module.css";
+
+export const dynamic = "force-dynamic";
 
 const MyPosts: FC = async () => {
   try {

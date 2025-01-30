@@ -7,6 +7,8 @@ import { axiosServerInstance } from "@/services/axios";
 
 import styles from "./main.module.css";
 
+export const dynamic = "force-dynamic";
+
 const AppliedPosts: FC = async () => {
   try {
     const res = await axiosServerInstance.get("/posts/applied-to?start_from=0");

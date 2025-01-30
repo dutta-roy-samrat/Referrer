@@ -1,47 +1,27 @@
-# syntax=docker/dockerfile:1
+FROM node:22.11.0-alpine AS base
 
-# Comments are provided throughout this file to help you get started.
-# If you need more help, visit the Dockerfile reference guide at
-# https://docs.docker.com/go/dockerfile-reference/
+WORKDIR /app
+COPY ./package.json ./package-lock.json  ./yarn.lock ./
+RUN yarn install --frozen-lockfile && yarn cache clean
 
-# Want to help us make this template better? Share your feedback here: https://forms.gle/ybq9Krt8jtBL3iCk7
+FROM node:22.11.0-alpine AS build
+WORKDIR /app
+COPY . .
+COPY --from=base /app/node_modules ./node_modules
+RUN yarn build
 
-ARG NODE_VERSION=22.11.0
 
-################################################################################
-# Use node image for base image for all stages.
-FROM node:${NODE_VERSION}-alpine AS base
+FROM node:22.11.0-alpine  AS final
+
+ENV NODE_ENV=production
 
 WORKDIR /app
 
-FROM base AS deps
+COPY --from=build /app/.next/standalone ./.next/standalone
+COPY --from=build /app/.next/static ./.next/standalone/.next/static
 
-COPY ./package.json ./package-lock.json  ./yarn.lock ./
-RUN yarn install --production --frozen-lockfile && yarn cache clean
-
-FROM deps as build
-
-COPY . .
-
-RUN yarn run build
-
-
-FROM base as final
-
-# Use production node environment by default.
-ENV NODE_ENV production
-
-# Run the application as a non-root user.
-USER node
-
-# Copy the production dependencies from the deps stage and also
-# the built application from the build stage into the image.
-COPY --from=deps /app/node_modules ./node_modules
-COPY --from=build /app/.next ./.next
-
-
-# Expose the port that the application listens on.
 EXPOSE 3000
 
-# Run the application.
-CMD yarn start
+ENV PORT=3000
+
+CMD HOSTNAME="0.0.0.0" node .next/standalone/server.js

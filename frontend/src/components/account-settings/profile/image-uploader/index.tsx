@@ -51,7 +51,7 @@ const ProfileImageUploader: React.FC<ProfileImageUploaderProps> = ({
     setImageSrc("");
   };
 
-  const handleImageEdit = (e: React.MouseEvent) => {
+  const handleImageEdit = () => {
     setSelectedFile(confirmedFile);
   };
 

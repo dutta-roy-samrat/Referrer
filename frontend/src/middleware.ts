@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { axiosServerInstance } from "./services/axios";
-import { AUTH_PAGES } from "./constants/app-defaults";
+
+import { axiosServerInstance } from "@/services/axios";
+
+import { AUTH_PAGES } from "@/constants/app-defaults";
 
 export async function middleware(request: NextRequest) {
   const refreshToken = request.cookies.get("refresh");

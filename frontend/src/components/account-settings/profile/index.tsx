@@ -13,7 +13,7 @@ import ErrorMessage from "@/components/shared/error-message";
 import ProfileImageUploader from "@/components/account-settings/profile/image-uploader";
 import AuthFormLayout from "@/components/auth-form-layout";
 import PageLoader from "@/components/ui/loader/page-loader";
-import NDotsLoader from "@/components/ui/loader/n-dots";
+import StyledButton from "@/components/ui/button/styled-button";
 
 import { useCurrentDeviceContext } from "@/contexts/device";
 import { useAuthContext, AuthDataType } from "@/contexts/auth";
@@ -28,7 +28,6 @@ import { fetchApplicationInfo } from "@/graphql/query/application-info";
 import { MEDIA_LIBRARY_URL } from "@/constants/environment-variables";
 
 import styles from "./main.module.css";
-import StyledButton from "@/components/ui/button/styled-button";
 
 export type FormState = {
   firstName: string;
@@ -47,12 +46,12 @@ export type FormErrors = {
 };
 
 type FormSubmissionData = {
-  firstName?: string;
-  lastName?: string;
-  experience?: number;
-  resume?: File | null;
-  profileImage?: File | undefined | null;
-};
+  firstName: string;
+  lastName: string;
+  experience: number;
+  resume: File | null;
+  profileImage: File | null;
+} | Record<string, any>;
 
 const defaultFormValues: FormState = {
   firstName: "",

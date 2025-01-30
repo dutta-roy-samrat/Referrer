@@ -8,6 +8,8 @@ import { axiosServerInstance } from "@/services/axios";
 import styles from "./main.module.css";
 import StyledLink from "@/components/ui/link/styled-link";
 
+export const dynamic = "force-dynamic";
+
 const FeedPage: FC = async () => {
   try {
     const res = await axiosServerInstance.get("/posts?start_from=0");

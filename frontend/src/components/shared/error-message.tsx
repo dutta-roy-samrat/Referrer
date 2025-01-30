@@ -1,4 +1,4 @@
-import { FC, ReactNode } from "react";
+import { FC } from "react";
 import { FieldError, Merge, FieldErrorsImpl } from "react-hook-form";
 
 interface ErrorMessageProps {

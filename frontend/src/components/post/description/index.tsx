@@ -6,7 +6,6 @@ import {
   Dialog,
   DialogContent,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import SackDollarIcon from "@/components/ui/icons/sack-dollar";
 import UserTieIcon from "@/components/ui/icons/user-tie";
