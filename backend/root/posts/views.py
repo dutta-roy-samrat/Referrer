@@ -19,12 +19,10 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-
 def get_paginated_query(queryset, limit, start_from):
     limit = int(limit) if limit else 20
     start_from = int(start_from) if start_from else 0
     return queryset[start_from : start_from + limit]
-
 
 class PostsView(APIView):
     authentication_classes = []
@@ -86,6 +84,7 @@ class PostsView(APIView):
             if post_serializer.is_valid():
                 post = post_serializer.save()
                 send_event("post", "message", PostsSerializer(post).data)
+                logger.info(f"Post successfully created: {post.id}")
                 return Response(
                     {"message": "Post successfully created"}, status=HTTP_201_CREATED
                 )
@@ -109,6 +108,7 @@ class MyPostsView(APIView):
                 request.query_params.get("start_from"),
             )
             posts_serializer = PostsSerializer(posts, many=True)
+            logger.info(f"Fetched posts for user: {request.user.id}")
             return Response(posts_serializer.data, status=HTTP_200_OK)
 
         except Exception as e:
@@ -150,6 +150,7 @@ class MyPostsView(APIView):
                 request.user.save()
 
             post_instance.applied_by.add(request.user)
+            logger.info(f"User {request.user.id} applied to post {post_instance.id}")
 
             return Response(
                 {"message": "Successfully applied to the post!"}, status=HTTP_200_OK
@@ -173,6 +174,7 @@ class MyPostsView(APIView):
             post_instance = get_object_or_404(Post, id=post_id)
             post_instance.delete()
             send_event("post", "message", {"action": "delete", "id": post_id})
+            logger.info(f"Post {post_id} deleted successfully")
             return Response(
                 {"message": "Post deleted successfully!"}, status=HTTP_200_OK
             )
@@ -194,6 +196,7 @@ class AppliedPostsView(APIView):
                 request.query_params.get("start_from"),
             )
             posts_serializer = PostsSerializer(posts, many=True)
+            logger.info(f"Fetched applied posts for user: {request.user.id}")
             return Response(posts_serializer.data, status=HTTP_200_OK)
 
         except Exception as e:

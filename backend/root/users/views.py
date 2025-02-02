@@ -1,10 +1,10 @@
+import logging
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework_simplejwt.tokens import RefreshToken, AccessToken
 from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
 from rest_framework_simplejwt.settings import api_settings
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework.permissions import IsAuthenticated
-
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.status import (
@@ -24,15 +24,11 @@ from django.utils.http import urlsafe_base64_encode
 from django.contrib.auth.hashers import make_password
 from django.conf import settings
 from django.http import HttpResponse
-
 from .serializers import RegisterUserSerializer
 
 UserModel = apps.get_model(settings.AUTH_USER_MODEL)
+logger = logging.getLogger(__name__)
 
-INTERNAL_RESET_SESSION_TOKEN = "_password_reset_token"
-
-
-# Utility function for setting cookies
 def set_cookie(response, key, value, max_age):
     response.set_cookie(
         key=key,
@@ -43,20 +39,19 @@ def set_cookie(response, key, value, max_age):
         max_age=max_age,
     )
 
-
 def check_refresh_token_validation(request):
     refresh_token = request.COOKIES.get("refresh")
     if not refresh_token:
+        logger.warning("No refresh token found in the cookies.")
         return HttpResponse(status=HTTP_400_BAD_REQUEST)
     try:
-        token = RefreshToken(refresh_token)  # Validate the token
-        token.check_exp()  # Ensure the token has not expired
+        token = RefreshToken(refresh_token)
+        token.check_exp()
         return HttpResponse(status=HTTP_200_OK)
     except TokenError:
+        logger.error("Invalid or expired refresh token.")
         return HttpResponse(status=HTTP_401_UNAUTHORIZED)
 
-
-# Refined Views
 class RegisterView(APIView):
     authentication_classes = []
 
@@ -72,12 +67,14 @@ class RegisterView(APIView):
                 )
                 set_cookie(response, "access", str(refresh.access_token), 60 * 60)
                 set_cookie(response, "refresh", str(refresh), 7 * 24 * 60 * 60)
+                logger.info(f"User registered successfully: {user.username}")
                 return response
             else:
+                logger.warning("User registration failed due to invalid data.")
                 return Response(serializer.errors, status=HTTP_400_BAD_REQUEST)
         except Exception as e:
+            logger.error(f"Error during user registration: {str(e)}")
             return Response({"error": str(e)}, status=HTTP_500_INTERNAL_SERVER_ERROR)
-
 
 class LoginView(TokenObtainPairView):
     authentication_classes = []
@@ -87,6 +84,7 @@ class LoginView(TokenObtainPairView):
         try:
             serializer.is_valid(raise_exception=True)
         except TokenError as e:
+            logger.error(f"Login failed: {e.args[0]}")
             raise InvalidToken(e.args[0])
 
         response = Response(
@@ -105,8 +103,8 @@ class LoginView(TokenObtainPairView):
             str(tokens.get("refresh")),
             int(api_settings.REFRESH_TOKEN_LIFETIME.total_seconds()),
         )
+        logger.info(f"User logged in successfully: {request.data.get('username')}")
         return response
-
 
 class CustomPasswordResetView(APIView):
     class CustomPasswordResetForm(PasswordResetForm):
@@ -140,6 +138,7 @@ class CustomPasswordResetView(APIView):
     def post(self, request, *args, **kwargs):
         email = request.data.get("email")
         if not email:
+            logger.warning("Password reset requested without providing an email.")
             return Response(
                 {"error": "Email is required."}, status=HTTP_400_BAD_REQUEST
             )
@@ -157,25 +156,28 @@ class CustomPasswordResetView(APIView):
                 },
             }
             form.save(**opts)
+            logger.info(f"Password reset email sent for email: {email}")
             return Response(
                 {"message": "Password reset email sent."}, status=HTTP_200_OK
             )
         else:
+            logger.warning(f"Invalid email address provided: {email}")
             return Response(
                 {"error": "Invalid email address."}, status=HTTP_400_BAD_REQUEST
             )
-
 
 @method_decorator(csrf_exempt, name="dispatch")
 class CustomPasswordResetConfirmView(APIView):
     def post(self, request, uidb64, token, *args, **kwargs):
         user = self.get_user(uidb64)
         if not user:
+            logger.error("Password reset failed: Invalid user.")
             return Response({"error": "Invalid user."}, status=HTTP_400_BAD_REQUEST)
 
         new_password = request.data.get("new_password")
         confirm_password = request.data.get("confirm_password")
         if new_password != confirm_password:
+            logger.warning("Passwords do not match during password reset.")
             return Response(
                 {"error": "Passwords do not match."}, status=HTTP_400_BAD_REQUEST
             )
@@ -185,14 +187,15 @@ class CustomPasswordResetConfirmView(APIView):
             if user.id == access_token["user_id"]:
                 user.password = make_password(new_password)
                 user.save()
+                logger.info(f"Password reset successful for user: {user.username}")
                 return Response(
                     {"message": "Password reset successful."}, status=HTTP_200_OK
                 )
         except InvalidToken:
+            logger.error("Password reset failed: Invalid or expired token.")
             return Response(
                 {"error": "Invalid or expired token."}, status=HTTP_400_BAD_REQUEST
             )
-
 
 class UpdateUserView(APIView):
     permission_classes = [IsAuthenticated]
@@ -203,17 +206,18 @@ class UpdateUserView(APIView):
             serializer = RegisterUserSerializer(user, data=request.data, partial=True)
             if serializer.is_valid():
                 serializer.save()
+                logger.info(f"User details updated successfully: {user.username}")
                 return Response(
                     {"message": "User details updated successfully."},
                     status=HTTP_200_OK,
                 )
             return Response(serializer.errors, status=HTTP_400_BAD_REQUEST)
         except Exception as e:
+            logger.error(f"Error updating user details: {str(e)}")
             return Response(
                 {"error": "An error occurred while updating user details."},
                 status=HTTP_500_INTERNAL_SERVER_ERROR,
             )
-
 
 class LogoutView(APIView):
     def post(self, request):
@@ -223,4 +227,5 @@ class LogoutView(APIView):
         )
         response.delete_cookie("access", path="/")
         response.delete_cookie("refresh", path="/")
+        logger.info(f"User logged out successfully: {request.user.username}")
         return response
