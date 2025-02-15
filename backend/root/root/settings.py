@@ -109,7 +109,7 @@ DATABASES = {
         "NAME": "referrer-db",
         "USER": os.getenv("DB_USER", default=""),
         "PASSWORD": os.getenv("DB_PASSWORD", default=""),
-        "HOST": "127.0.0.1",
+        "HOST": "db",
         "PORT": "5432",
     }
 }

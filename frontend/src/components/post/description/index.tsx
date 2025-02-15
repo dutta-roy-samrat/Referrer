@@ -19,8 +19,24 @@ import ReferralApplicationForm from "@/components/form/referral-application";
 import StyledButton from "@/components/ui/button/styled-button";
 
 import styles from "./main.module.css";
+import AppliedByList from "@/components/post/applied-by-list";
 
-const JobDescriptionPage: FC<PostProps & { view_only: boolean }> = ({
+const defaultArr: any[] = [];
+
+export type AppliedByType = {
+  id: number;
+  first_name: string;
+  last_name: string;
+  resume: string;
+  experience: number;
+};
+
+const JobDescriptionPage: FC<
+  PostProps & {
+    view_only: boolean;
+    applied_by?: AppliedByType[];
+  }
+> = ({
   skills_display = [],
   experience,
   expiry_date,
@@ -31,10 +47,28 @@ const JobDescriptionPage: FC<PostProps & { view_only: boolean }> = ({
   id,
   job_description,
   view_only,
+  applied_by = defaultArr,
 }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const handleModalOpen = () => setIsModalOpen(true);
   const handleModalClose = () => setIsModalOpen(false);
+
+  const renderApplyCta = () => (
+    <div className={styles.dialogContainer}>
+      <Dialog open={isModalOpen}>
+        <ArrowOnHover
+          text="Apply Here"
+          Component={StyledButton}
+          onClick={handleModalOpen}
+        />
+        <DialogContent onClose={handleModalClose}>
+          <DialogTitle>Application Form</DialogTitle>
+          <ReferralApplicationForm id={id} setIsModalOpen={setIsModalOpen} />
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+
   return (
     <div className={styles.pageContainer}>
       <header className={styles.headerContent}>
@@ -61,24 +95,8 @@ const JobDescriptionPage: FC<PostProps & { view_only: boolean }> = ({
           </div>
         )}
       </main>
-      {!view_only && (
-        <div className={styles.dialogContainer}>
-          <Dialog open={isModalOpen}>
-            <ArrowOnHover
-              text="Apply Here"
-              Component={StyledButton}
-              onClick={handleModalOpen}
-            />
-            <DialogContent onClose={handleModalClose}>
-              <DialogTitle>Application Form</DialogTitle>
-              <ReferralApplicationForm
-                id={id}
-                setIsModalOpen={setIsModalOpen}
-              />
-            </DialogContent>
-          </Dialog>
-        </div>
-      )}
+      {!view_only && renderApplyCta()}
+      {!!applied_by.length && <AppliedByList applied_by={applied_by}/>}
     </div>
   );
 };

@@ -9,7 +9,6 @@ const PostDescriptionPage: FC<{ params: Promise<{ id: string }> }> = async ({
 }) => {
   const id = (await params).id;
   const { data } = await axiosServerInstance.get(`/posts/${id}`);
-  console.log(data, "kklop");
   return <JobDescriptionPage {...data} />;
 };
 
