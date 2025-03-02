@@ -1,6 +1,9 @@
 import { FC } from "react";
+import dynamic from "next/dynamic";
 
-import ProfileSettings from "@/components/account-settings/profile";
+const ProfileSettings = dynamic(
+  () => import("@/components/account-settings/profile"),
+);
 
 const ProfileSettingsPage: FC = () => <ProfileSettings />;
 

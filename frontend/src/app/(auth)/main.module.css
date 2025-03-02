@@ -3,7 +3,7 @@
 }
 
 .leftContentContainer {
-  @apply flex flex-col items-center justify-center gap-5 bg-white pb-14 pt-24 text-black;
+  @apply flex flex-col items-center justify-center gap-5 bg-white py-14 text-black;
 }
 
 .logo {
@@ -19,5 +19,5 @@
 }
 
 .rightContentContainer {
-  @apply flex flex-col items-center justify-center gap-4 bg-black pb-24 pt-10;
+  @apply flex flex-col items-center justify-center gap-4 bg-black py-14;
 }

@@ -1,14 +1,17 @@
-import { getAuthCookieHeader } from "@/helpers/server-cookie";
 import axios from "axios";
 
+import { getAuthCookieHeader } from "@/helpers/server-cookie";
+
+import { API_URL } from "@/constants/environment-variables";
+
 export const axiosInstance = axios.create({
-  baseURL: "http://localhost:8000",
+  baseURL: API_URL,
   timeout: 1000,
   withCredentials: true,
 });
 
 export const axiosServerInstance = axios.create({
-  baseURL: "http://localhost:8000",
+  baseURL: API_URL,
   timeout: 1000,
 });
 

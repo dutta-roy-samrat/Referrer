@@ -1,13 +1,18 @@
 import { FC } from "react";
+import lazyload from "next/dynamic";
 
 import Feed from "@/components/feed";
-import AddReferralModal from "@/components/modals/add-referral-modal";
 
 import { axiosServerInstance } from "@/services/axios";
 
 import styles from "./main.module.css";
 
+
 export const dynamic = "force-dynamic";
+
+const AddReferralModal = lazyload(
+  () => import("@/components/modals/add-referral-modal"),
+);
 
 const MyPosts: FC = async () => {
   try {

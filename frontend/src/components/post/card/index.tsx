@@ -1,4 +1,5 @@
 import { FC } from "react";
+import { AxiosError } from "axios";
 
 import {
   Card,
@@ -12,15 +13,16 @@ import UserTieIcon from "@/components/ui/icons/user-tie";
 import ClockIcon from "@/components/ui/icons/clock";
 import LocationIcon from "@/components/ui/icons/location";
 import DeleteButton from "@/components/ui/button/delete";
-import ArrowOnHover from "@/components/ui/interactive-arrow-on-hover";
 import JobField from "@/components/post/shared/job-field";
 import Skills from "@/components/post/shared/skills";
+import FooterBtn from "@/components/post/card/footer-btn";
+
 import { PostProps } from "@/components/post/types";
 
-import styles from "./main.module.css";
 import { axiosInstance } from "@/services/axios";
 import { onErrorToastMsg, onSuccessToastMsg } from "@/services/toastify";
-import { AxiosError } from "axios";
+
+import styles from "./main.module.css";
 
 const PostCard: FC<PostProps> = ({
   showDeleteBtn = false,
@@ -72,11 +74,7 @@ const PostCard: FC<PostProps> = ({
       </CardContent>
 
       <CardFooter className={styles.cardFooter}>
-        <ArrowOnHover
-          text="Check Description"
-          href={`/post/${id}`}
-          className={styles.checkDescriptionCta}
-        />
+        <FooterBtn id={id}/>
       </CardFooter>
     </Card>
   );

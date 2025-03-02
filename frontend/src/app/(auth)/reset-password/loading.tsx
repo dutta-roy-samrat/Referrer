@@ -1,5 +1,5 @@
-import PageLoader from "@/components/ui/loader/page-loader";
+import SpinnerLoader from "@/components/ui/loader/spinner";
 
 export default function Loading() {
-  return <PageLoader />;
+  return <SpinnerLoader/>;
 }

@@ -2,43 +2,32 @@
 
 import * as React from "react";
 import { format } from "date-fns";
-import { ActiveModifiers, SelectSingleEventHandler } from "react-day-picker";
+import { SelectSingleEventHandler } from "react-day-picker";
 
 import { cn } from "@/lib/utils";
 
 import StyledButton from "@/components/ui/button/styled-button";
-import { Calendar } from "@/components/ui/calendar";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+import { Popover, PopoverTrigger } from "@/components/ui/popover";
 import CalendarIcon from "@/components/ui/icons/calender";
+import dynamic from "next/dynamic";
 
-type DatePickerProps = {
+const DatePicker = dynamic(
+  () => import("@/components/ui/date-picker-input/picker"),
+);
+
+type DatePickerInputProps = {
   date: Date | undefined;
   id?: string;
   className?: string;
   setDate: SelectSingleEventHandler;
 };
 
-const DatePicker = React.forwardRef<HTMLButtonElement, DatePickerProps>(
+const DatePickerInput = React.forwardRef<HTMLButtonElement, DatePickerInputProps>(
   ({ date: selectedDate, setDate, id = "", className = "" }, ref) => {
     const defaultInputClas = cn(
       "h-[50px] justify-left text-left font-normal",
       !selectedDate && "text-muted-foreground",
     );
-    const isDisabledDate = (date: Date) => date < new Date();
-    const handleSelect = (
-      day: Date | undefined,
-      selectedDay: Date,
-      activeModifiers: ActiveModifiers,
-      e: React.MouseEvent,
-    ) => {
-      console.log(day, selectedDay);
-      if (!day) return;
-      return setDate(day, selectedDay, activeModifiers, e);
-    };
 
     return (
       <Popover>
@@ -58,17 +47,12 @@ const DatePicker = React.forwardRef<HTMLButtonElement, DatePickerProps>(
             )}
           </StyledButton>
         </PopoverTrigger>
-        <PopoverContent className="w-auto p-0" onModal>
-          <Calendar
-            mode="single"
-            selected={selectedDate}
-            onSelect={handleSelect}
-            disabled={isDisabledDate}
-          />
-        </PopoverContent>
+        <DatePicker setDate={setDate} selectedDate={selectedDate} />
       </Popover>
     );
   },
 );
 
-export default DatePicker;
+DatePickerInput.displayName = "DatePickerInput";
+
+export default DatePickerInput;

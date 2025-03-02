@@ -7,18 +7,19 @@ import {
   ApolloProvider,
   HttpLink,
 } from "@apollo/client";
+import { GRAPHQL_URL } from "@/constants/environment-variables";
 
 type ApolloGraphqlWrapperProps = {
   children: ReactNode;
 };
 
 const httpLink = new HttpLink({
-  uri: "http://localhost:8000/graphql/",
+  uri: GRAPHQL_URL,
   credentials: "include",
 });
 
 const client = new ApolloClient({
-  uri: "http://localhost:8000/graphql/",
+  uri: GRAPHQL_URL,
   cache: new InMemoryCache(),
   link: httpLink,
 });

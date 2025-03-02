@@ -1,14 +1,18 @@
 import { FC } from "react";
+import lazyload from "next/dynamic";
 
 import Feed from "@/components/feed";
-import AddReferralModal from "@/components/modals/add-referral-modal";
+import StyledLink from "@/components/ui/link/styled-link";
 
 import { axiosServerInstance } from "@/services/axios";
 
 import styles from "./main.module.css";
-import StyledLink from "@/components/ui/link/styled-link";
 
 export const dynamic = "force-dynamic";
+
+const AddReferralModal = lazyload(
+  () => import("@/components/modals/add-referral-modal"),
+);
 
 const FeedPage: FC = async () => {
   try {
@@ -42,8 +46,12 @@ const FeedPage: FC = async () => {
         </main>
       </div>
     );
-  } catch (e) {
-    console.error(e);
+  } catch {
+    return (
+      <div>
+        Facing issues from server, our team is currently looking into it.
+      </div>
+    );
   }
 };
 

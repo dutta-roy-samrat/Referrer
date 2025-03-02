@@ -1,7 +1,10 @@
+"use client"
+
 import { ReactNode, ElementType } from "react";
 import Image from "next/image";
 
 import StyledLink from "@/components/ui/link/styled-link";
+import NDotsLoader from "@/components/ui/loader/n-dots";
 
 import { cn } from "@/lib/utils";
 
@@ -13,6 +16,7 @@ type ArrowOnHoverProps<T extends ElementType = typeof StyledLink> = {
   Component?: T;
   href?: string;
   onClick?: () => void;
+  loading?: boolean;
 };
 
 const ArrowOnHover = <T extends ElementType = typeof StyledLink>({
@@ -20,6 +24,7 @@ const ArrowOnHover = <T extends ElementType = typeof StyledLink>({
   className = "",
   Component,
   href = "#",
+  loading,
   ...restProps
 }: ArrowOnHoverProps<T>) => {
   const ComponentToRender = Component || StyledLink;
@@ -42,7 +47,11 @@ const ArrowOnHover = <T extends ElementType = typeof StyledLink>({
       )}
       {...restProps}
     >
-      {renderContent()}
+      {loading ? (
+        <NDotsLoader numOfDots={5} dotClass="!bg-white" />
+      ) : (
+        renderContent()
+      )}
     </ComponentToRender>
   );
 };

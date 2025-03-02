@@ -1,9 +1,13 @@
-import AddReferralModal from "@/components/modals/add-referral-modal";
 import Image from "next/image";
+import dynamic from "next/dynamic";
 
 import referralImg from "@/assets/illustrations/referral.svg";
 
 import styles from "./main.module.css";
+
+const AddReferralModal = dynamic(
+  () => import("@/components/modals/add-referral-modal"),
+);
 
 const Dashboard = () => {
   return (

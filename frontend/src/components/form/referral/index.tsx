@@ -1,5 +1,7 @@
 "use client";
 
+import dynamic from "next/dynamic";
+
 import {
   ChangeEventHandler,
   Dispatch,
@@ -13,7 +15,6 @@ import { FieldValues, SubmitHandler, useForm } from "react-hook-form";
 
 import ChipsInput from "@/components/ui/chips-input";
 import StyledButton from "@/components/ui/button/styled-button";
-import DatePicker from "@/components/ui/date-picker";
 
 import { axiosInstance } from "@/services/axios";
 import { useAuthContext } from "@/contexts/auth";
@@ -24,6 +25,8 @@ import { getInputClass } from "@/helpers/utils";
 import { cn } from "@/lib/utils";
 
 import styles from "./main.module.css";
+
+const DatePicker = dynamic(() => import("@/components/ui/date-picker-input"));
 
 const ReferralPostDialogContent = ({
   setIsFormDialogOpen,
@@ -153,10 +156,6 @@ const ReferralPostDialogContent = ({
           })}
           {...register("jobDescription", {
             required: "Job Description is a required field",
-            maxLength: {
-              value: 25,
-              message: "Max Limit 25 characters including space",
-            },
           })}
         />
         {errors.jobDescription && (
