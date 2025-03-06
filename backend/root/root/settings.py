@@ -45,6 +45,7 @@ REST_FRAMEWORK = {
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -67,10 +68,8 @@ CSRF_TRUSTED_ORIGINS = [os.getenv("CSRF_TRUSTED_ORIGINS", default="")]
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_HOST = "smtp-relay.brevo.com"
 EMAIL_PORT = 587
-EMAIL_USE_TLS = True 
-EMAIL_HOST_USER = os.getenv(
-    "BREVO_EMAIL_HOST_USER", default=""
-)
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = os.getenv("BREVO_EMAIL_HOST_USER", default="")
 EMAIL_HOST_PASSWORD = os.getenv("BREVO_EMAIL_HOST_PASSWORD", default="")
 DEFAULT_FROM_EMAIL = os.getenv("BREVO_DEFAULT_EMAIL", default="")
 
@@ -97,7 +96,7 @@ WSGI_APPLICATION = "root.wsgi.application"
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": "referrer-db",
+        "NAME": os.getenv("DB_NAME", default=""),
         "USER": os.getenv("DB_USER", default=""),
         "PASSWORD": os.getenv("DB_PASSWORD", default=""),
         "HOST": os.getenv("DB_HOST", default=""),
@@ -134,7 +133,7 @@ STATICFILES_DIRS = [path.join(BASE_DIR, "static")]
 
 if not DEBUG:
     STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
-    STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 MEDIA_URL = "/media/"
 MEDIA_ROOT = path.join(BASE_DIR, "media")

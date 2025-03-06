@@ -19,6 +19,7 @@ python-dotenv = "^1.0.1"
 psycopg = {extras = ["binary"], version = "^3.2.3"}
 graphene-django = "^3.2.2"
 whitenoise = {extras = ["brotli"], version = "^6.9.0"}
+twisted = {extras = ["http2", "tls"], version = "^24.11.0"}
 
 
 [tool.poetry.group.test.dependencies]

@@ -715,6 +715,43 @@ PyJWT = ">=1.5,<3"
 six = ">=1.10.0,<2"
 
 [[package]]
+name = "h2"
+version = "4.2.0"
+description = "Pure-Python HTTP/2 protocol implementation"
+optional = false
+python-versions = ">=3.9"
+files = [
+    {file = "h2-4.2.0-py3-none-any.whl", hash = "sha256:479a53ad425bb29af087f3458a61d30780bc818e4ebcf01f0b536ba916462ed0"},
+    {file = "h2-4.2.0.tar.gz", hash = "sha256:c8a52129695e88b1a0578d8d2cc6842bbd79128ac685463b887ee278126ad01f"},
+]
+
+[package.dependencies]
+hpack = ">=4.1,<5"
+hyperframe = ">=6.1,<7"
+
+[[package]]
+name = "hpack"
+version = "4.1.0"
+description = "Pure-Python HPACK header encoding"
+optional = false
+python-versions = ">=3.9"
+files = [
+    {file = "hpack-4.1.0-py3-none-any.whl", hash = "sha256:157ac792668d995c657d93111f46b4535ed114f0c9c8d672271bbec7eae1b496"},
+    {file = "hpack-4.1.0.tar.gz", hash = "sha256:ec5eca154f7056aa06f196a557655c5b009b382873ac8d1e66e79e87535f1dca"},
+]
+
+[[package]]
+name = "hyperframe"
+version = "6.1.0"
+description = "Pure-Python HTTP/2 framing"
+optional = false
+python-versions = ">=3.9"
+files = [
+    {file = "hyperframe-6.1.0-py3-none-any.whl", hash = "sha256:b03380493a519fce58ea5af42e4a42317bf9bd425596f7a0835ffce80f1a42e5"},
+    {file = "hyperframe-6.1.0.tar.gz", hash = "sha256:f630908a00854a7adeabd6382b43923a4c4cd4b821fcb527e6ab9e15382a3b08"},
+]
+
+[[package]]
 name = "hyperlink"
 version = "21.0.0"
 description = "A featureful, immutable, and correct URL for Python."
@@ -958,6 +995,17 @@ files = [
 docs = ["furo (>=2024.8.6)", "proselint (>=0.14)", "sphinx (>=8.0.2)", "sphinx-autodoc-typehints (>=2.4)"]
 test = ["appdirs (==1.4.4)", "covdefaults (>=2.3)", "pytest (>=8.3.2)", "pytest-cov (>=5)", "pytest-mock (>=3.14)"]
 type = ["mypy (>=1.11.2)"]
+
+[[package]]
+name = "priority"
+version = "1.3.0"
+description = "A pure-Python implementation of the HTTP/2 priority tree"
+optional = false
+python-versions = "*"
+files = [
+    {file = "priority-1.3.0-py2.py3-none-any.whl", hash = "sha256:be4fcb94b5e37cdeb40af5533afe6dd603bd665fe9c8b3052610fc1001d5d1eb"},
+    {file = "priority-1.3.0.tar.gz", hash = "sha256:6bc1961a6d7fcacbfc337769f1a382c8e746566aaa365e78047abe9f66b2ffbe"},
+]
 
 [[package]]
 name = "promise"
@@ -1369,9 +1417,11 @@ files = [
 attrs = ">=22.2.0"
 automat = ">=24.8.0"
 constantly = ">=15.1"
+h2 = {version = ">=3.2,<5.0", optional = true, markers = "extra == \"http2\""}
 hyperlink = ">=17.1.1"
 idna = {version = ">=2.4", optional = true, markers = "extra == \"tls\""}
 incremental = ">=24.7.0"
+priority = {version = ">=1.1.0,<2.0", optional = true, markers = "extra == \"http2\""}
 pyopenssl = {version = ">=21.0.0", optional = true, markers = "extra == \"tls\""}
 service-identity = {version = ">=18.1.0", optional = true, markers = "extra == \"tls\""}
 typing-extensions = ">=4.2.0"
@@ -1538,4 +1588,4 @@ testing = ["coverage[toml]", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.13"
-content-hash = "73807ea0a0180c8b5015c147b9c23f7be9a48d5e7d94de2981a6ee73076804d6"
+content-hash = "77867b33530fbdbcf889cf941ec26724902bca2a229f21a46df6d78aecc3b64c"
