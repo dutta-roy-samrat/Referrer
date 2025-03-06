@@ -28,12 +28,13 @@ COPY . .
 
 ENV PATH="/app/.venv/bin:$PATH"
 
+WORKDIR /app/root
+RUN poetry run python manage.py collectstatic --noinput
+
 EXPOSE 8000
 
 RUN chmod +x /app/scripts/server.sh
 RUN useradd -m nonRootUser
 USER nonRootUser
-
-WORKDIR /app/root
 
 ENTRYPOINT [ "/app/scripts/server.sh" ]
