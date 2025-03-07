@@ -13,8 +13,7 @@ const nextConfig = (() => {
       ] : [
         {
           protocol: 'https',
-          hostname: 'localhost',
-          port: '8000',
+          hostname: 'referrer-backend.onrender.com',
         }
       ],
     },
