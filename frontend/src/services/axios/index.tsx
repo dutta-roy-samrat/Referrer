@@ -6,13 +6,13 @@ import { API_URL } from "@/constants/environment-variables";
 
 export const axiosInstance = axios.create({
   baseURL: API_URL,
-  timeout: 1000,
+  timeout: 5000,
   withCredentials: true,
 });
 
 export const axiosServerInstance = axios.create({
   baseURL: API_URL,
-  timeout: 1000,
+  timeout: 5000,
 });
 
 axiosServerInstance.interceptors.request.use(
