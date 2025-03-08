@@ -153,7 +153,7 @@ ASGI_APPLICATION = "root.asgi.application"
 
 COMPANY_NAME = "Referrer"
 
-SECURE_COOKIES = False
+SECURE_COOKIES = not DEBUG
 
 LOGGING = {
     "version": 1,
