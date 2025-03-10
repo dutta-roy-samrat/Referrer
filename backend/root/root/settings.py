@@ -134,7 +134,7 @@ STATICFILES_DIRS = [os.path.join(BASE_DIR, "static")]
 
 if not DEBUG:
     STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
-    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+    STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 MEDIA_URL = "/media/"
 MEDIA_ROOT = path.join(BASE_DIR, "media")
@@ -154,6 +154,7 @@ ASGI_APPLICATION = "root.asgi.application"
 COMPANY_NAME = "Referrer"
 
 SECURE_COOKIES = not DEBUG
+SESSION_COOKIE_DOMAIN = os.getenv("SESSION_COOKIE_DOMAIN", default="")
 
 LOGGING = {
     "version": 1,

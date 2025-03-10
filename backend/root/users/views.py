@@ -29,15 +29,18 @@ from .serializers import RegisterUserSerializer
 UserModel = apps.get_model(settings.AUTH_USER_MODEL)
 logger = logging.getLogger(__name__)
 
+
 def set_cookie(response, key, value, max_age):
     response.set_cookie(
         key=key,
         value=value,
         httponly=True,
         secure=settings.SECURE_COOKIES,
-        samesite="Strict",
+        samesite="None",
         max_age=max_age,
+        domain=settings.SESSION_COOKIE_DOMAIN,
     )
+
 
 def check_refresh_token_validation(request):
     refresh_token = request.COOKIES.get("refresh")
@@ -51,6 +54,7 @@ def check_refresh_token_validation(request):
     except TokenError:
         logger.error("Invalid or expired refresh token.")
         return HttpResponse(status=HTTP_401_UNAUTHORIZED)
+
 
 class RegisterView(APIView):
     authentication_classes = []
@@ -75,6 +79,7 @@ class RegisterView(APIView):
         except Exception as e:
             logger.error(f"Error during user registration: {str(e)}")
             return Response({"error": str(e)}, status=HTTP_500_INTERNAL_SERVER_ERROR)
+
 
 class LoginView(TokenObtainPairView):
     authentication_classes = []
@@ -105,6 +110,7 @@ class LoginView(TokenObtainPairView):
         )
         logger.info(f"User logged in successfully: {request.data.get('username')}")
         return response
+
 
 class CustomPasswordResetView(APIView):
     class CustomPasswordResetForm(PasswordResetForm):
@@ -166,6 +172,7 @@ class CustomPasswordResetView(APIView):
                 {"error": "Invalid email address."}, status=HTTP_400_BAD_REQUEST
             )
 
+
 @method_decorator(csrf_exempt, name="dispatch")
 class CustomPasswordResetConfirmView(APIView):
     def post(self, request, uidb64, token, *args, **kwargs):
@@ -197,6 +204,7 @@ class CustomPasswordResetConfirmView(APIView):
                 {"error": "Invalid or expired token."}, status=HTTP_400_BAD_REQUEST
             )
 
+
 class UpdateUserView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -218,6 +226,7 @@ class UpdateUserView(APIView):
                 {"error": "An error occurred while updating user details."},
                 status=HTTP_500_INTERNAL_SERVER_ERROR,
             )
+
 
 class LogoutView(APIView):
     def post(self, request):
