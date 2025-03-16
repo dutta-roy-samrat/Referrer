@@ -6,7 +6,12 @@ import {
   InMemoryCache,
   ApolloProvider,
   HttpLink,
+  ApolloLink,
+  from,
 } from "@apollo/client";
+
+import { getCookie } from "@/helpers/cookie";
+
 import { GRAPHQL_URL } from "@/constants/environment-variables";
 
 type ApolloGraphqlWrapperProps = {
@@ -15,13 +20,23 @@ type ApolloGraphqlWrapperProps = {
 
 const httpLink = new HttpLink({
   uri: GRAPHQL_URL,
-  credentials: "include",
+});
+
+const authMiddleware = new ApolloLink((operation, forward) => {
+  const accessToken = getCookie("access");
+  operation.setContext(({ headers = {} }) => ({
+    headers: {
+      ...headers,
+      authorization: accessToken ? `Bearer ${accessToken}` : "",
+    },
+  }));
+
+  return forward(operation);
 });
 
 const client = new ApolloClient({
-  uri: GRAPHQL_URL,
+  link: from([authMiddleware, httpLink]),
   cache: new InMemoryCache(),
-  link: httpLink,
 });
 
 const ApolloGraphqlWrapper: FC<ApolloGraphqlWrapperProps> = ({ children }) => (

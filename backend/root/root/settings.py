@@ -40,7 +40,7 @@ INSTALLED_APPS = [
 ]
 
 REST_FRAMEWORK = {
-    "DEFAULT_AUTHENTICATION_CLASSES": ["users.authentication.CustomJWTAuthentication"]
+    "DEFAULT_AUTHENTICATION_CLASSES": ["rest_framework_simplejwt.authentication.JWTAuthentication"]
 }
 
 MIDDLEWARE = [
@@ -50,7 +50,6 @@ MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
-    "users.middleware.RevalidateJWTTokenMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
@@ -60,6 +59,8 @@ GRAPHENE = {"SCHEMA": "root.schema.schema"}
 
 CORS_ALLOWED_ORIGINS = [os.getenv("CORS_ALLOWED_ORIGINS", default="")]
 CORS_ALLOW_CREDENTIALS = True
+CORS_EXPOSE_HEADERS = ["X-Access-Token", "X-Refresh-Token"]
+
 
 CSRF_TRUSTED_ORIGINS = [os.getenv("CSRF_TRUSTED_ORIGINS", default="")]
 
@@ -154,7 +155,7 @@ ASGI_APPLICATION = "root.asgi.application"
 COMPANY_NAME = "Referrer"
 
 SECURE_COOKIES = not DEBUG
-SESSION_COOKIE_DOMAIN = os.getenv("SESSION_COOKIE_DOMAIN", default="")
+FRONTEND_DOMAIN = os.getenv("FRONTEND_DOMAIN", default="")
 
 LOGGING = {
     "version": 1,

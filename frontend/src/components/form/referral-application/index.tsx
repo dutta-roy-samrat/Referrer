@@ -114,7 +114,6 @@ const ReferralApplicationForm: FC<ReferralApplicationFormProps> = ({
           const { pathname } = new URL(fetchedData, MEDIA_LIBRARY_URL);
           return fetchFile({ data: pathname.slice(1), fileName }).then(
             (res) => {
-              console.log(res, "kkl");
               setValue(fieldKey, [res] as File[]);
             },
           );

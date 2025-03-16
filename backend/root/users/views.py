@@ -14,9 +14,11 @@ from rest_framework.status import (
     HTTP_200_OK,
     HTTP_401_UNAUTHORIZED,
 )
+
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.core.exceptions import ValidationError
 from django.contrib.auth.forms import PasswordResetForm
 from django.apps import apps
-from django.contrib.sites.shortcuts import get_current_site
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.encoding import force_bytes
@@ -25,35 +27,46 @@ from django.contrib.auth.hashers import make_password
 from django.conf import settings
 from django.http import HttpResponse
 from .serializers import RegisterUserSerializer
+import json
+from django.shortcuts import get_object_or_404
 
 UserModel = apps.get_model(settings.AUTH_USER_MODEL)
 logger = logging.getLogger(__name__)
 
 
-def set_cookie(response, key, value, max_age):
-    response.set_cookie(
-        key=key,
-        value=value,
-        httponly=True,
-        secure=settings.SECURE_COOKIES,
-        samesite="None",
-        max_age=max_age,
-        domain=settings.SESSION_COOKIE_DOMAIN,
-    )
-
-
+@csrf_exempt
 def check_refresh_token_validation(request):
-    refresh_token = request.COOKIES.get("refresh")
-    if not refresh_token:
-        logger.warning("No refresh token found in the cookies.")
+    if request.method != 'POST':
         return HttpResponse(status=HTTP_400_BAD_REQUEST)
+        
     try:
+        data = json.loads(request.body)
+        refresh_token = data.get('refresh')
+        
+        if not refresh_token:
+            logger.warning("No refresh token found in request body.")
+            return HttpResponse(status=HTTP_400_BAD_REQUEST)
+
         token = RefreshToken(refresh_token)
         token.check_exp()
-        return HttpResponse(status=HTTP_200_OK)
-    except TokenError:
-        logger.error("Invalid or expired refresh token.")
+        
+        user = get_object_or_404(UserModel, id=token.payload.get('user_id'))
+        access_token = str(AccessToken.for_user(user))
+        
+        response = HttpResponse(status=HTTP_200_OK)
+        response["X-Access-Token"] = access_token
+        logger.info(f"New access token issued for user: {user.id}")
+        return response
+        
+    except json.JSONDecodeError:
+        logger.error("Invalid JSON in request body")
+        return HttpResponse(status=HTTP_400_BAD_REQUEST)
+    except TokenError as e:
+        logger.error(f"Invalid or expired refresh token: {str(e)}")
         return HttpResponse(status=HTTP_401_UNAUTHORIZED)
+    except Exception as e:
+        logger.error(f"Error during token validation: {str(e)}", exc_info=True)
+        return HttpResponse(status=HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 class RegisterView(APIView):
@@ -69,8 +82,9 @@ class RegisterView(APIView):
                     {"message": "User Created Successfully"},
                     status=HTTP_201_CREATED,
                 )
-                set_cookie(response, "access", str(refresh.access_token), 60 * 60)
-                set_cookie(response, "refresh", str(refresh), 7 * 24 * 60 * 60)
+                response["X-Access-Token"] = str(refresh.access_token)
+                response["X-Refresh-Token"] = str(refresh)
+
                 logger.info(f"User registered successfully: {user.username}")
                 return response
             else:
@@ -96,18 +110,9 @@ class LoginView(TokenObtainPairView):
             {"message": "User logged in successfully"}, status=HTTP_200_OK
         )
         tokens = serializer.validated_data
-        set_cookie(
-            response,
-            "access",
-            str(tokens.get("access")),
-            int(api_settings.ACCESS_TOKEN_LIFETIME.total_seconds()),
-        )
-        set_cookie(
-            response,
-            "refresh",
-            str(tokens.get("refresh")),
-            int(api_settings.REFRESH_TOKEN_LIFETIME.total_seconds()),
-        )
+        response["X-Access-Token"] = str(tokens.get("access"))
+        response["X-Refresh-Token"] = str(tokens.get("refresh"))
+
         logger.info(f"User logged in successfully: {request.data.get('username')}")
         return response
 
@@ -117,8 +122,7 @@ class CustomPasswordResetView(APIView):
         def save(self, **kwargs):
             email = self.cleaned_data["email"]
             if not kwargs.get("domain_override"):
-                current_site = get_current_site(kwargs.get("request"))
-                kwargs["domain"] = current_site.domain
+                kwargs["domain"] = settings.FRONTEND_DOMAIN
 
             email_field_name = UserModel.get_email_field_name()
             for user in self.get_users(email):
@@ -129,6 +133,7 @@ class CustomPasswordResetView(APIView):
                     "token": kwargs["token_generator"].for_user(user).access_token,
                     "protocol": "https" if kwargs["use_https"] else "http",
                     **(kwargs.get("extra_email_context") or {}),
+                    "domain": kwargs["domain"],
                 }
                 self.send_mail(
                     kwargs["subject_template_name"],
@@ -173,36 +178,55 @@ class CustomPasswordResetView(APIView):
             )
 
 
-@method_decorator(csrf_exempt, name="dispatch")
+@method_decorator(decorator=csrf_exempt, name="dispatch")
 class CustomPasswordResetConfirmView(APIView):
-    def post(self, request, uidb64, token, *args, **kwargs):
-        user = self.get_user(uidb64)
-        if not user:
-            logger.error("Password reset failed: Invalid user.")
-            return Response({"error": "Invalid user."}, status=HTTP_400_BAD_REQUEST)
+    token_generator = AccessToken
+    authentication_classes = []
 
+    def get_user(self, uidb64):
+        try:
+            uid = urlsafe_base64_decode(uidb64).decode()
+            user = UserModel._default_manager.get(pk=uid)
+        except (
+            TypeError,
+            ValueError,
+            OverflowError,
+            UserModel.DoesNotExist,
+            ValidationError,
+        ):
+            user = None
+        return user
+
+    def confirm_password(self, password1, password2):
+        if password1 == password2:
+            return True
+        else:
+            raise ValidationError
+
+    def post(self, request, *args, **kwargs):
         new_password = request.data.get("new_password")
         confirm_password = request.data.get("confirm_password")
-        if new_password != confirm_password:
-            logger.warning("Passwords do not match during password reset.")
-            return Response(
-                {"error": "Passwords do not match."}, status=HTTP_400_BAD_REQUEST
-            )
-
-        try:
-            access_token = AccessToken(token)
-            if user.id == access_token["user_id"]:
-                user.password = make_password(new_password)
-                user.save()
-                logger.info(f"Password reset successful for user: {user.username}")
+        self.user = self.get_user(kwargs["uidb64"])
+        token = kwargs["token"]
+        if self.user is not None:
+            try:
+                access_token = self.token_generator(token)
+                if self.user.id == access_token.get(
+                    "user_id"
+                ) and self.confirm_password(new_password, confirm_password):
+                    self.user.password = make_password(confirm_password)
+                    self.user.save()
+                    return Response(
+                        {"message": "Password reset done"}, status=HTTP_200_OK
+                    )
+                else:
+                    raise ValidationError
+            except InvalidToken:
                 return Response(
-                    {"message": "Password reset successful."}, status=HTTP_200_OK
+                    {"error": "Validation Error"}, status=HTTP_400_BAD_REQUEST
                 )
-        except InvalidToken:
-            logger.error("Password reset failed: Invalid or expired token.")
-            return Response(
-                {"error": "Invalid or expired token."}, status=HTTP_400_BAD_REQUEST
-            )
+        else:
+            Response({"error": "Invalid User"}, status=HTTP_400_BAD_REQUEST)
 
 
 class UpdateUserView(APIView):
@@ -234,7 +258,5 @@ class LogoutView(APIView):
             {"message": "User has been successfully logged out"},
             status=HTTP_200_OK,
         )
-        response.delete_cookie("access", path="/")
-        response.delete_cookie("refresh", path="/")
         logger.info(f"User logged out successfully: {request.user.username}")
         return response

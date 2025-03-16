@@ -1,30 +1,33 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-import { axiosServerInstance } from "@/services/axios";
+import { isTokenValid } from "@/helpers/utils";
 
 import { AUTH_PAGES } from "@/constants/app-defaults";
 
 export async function middleware(request: NextRequest) {
-  const refreshToken = request.cookies.get("refresh");
-  // redirection logic for auth pages
+  const accessToken = request.cookies.get("access")?.value;
+  const refreshToken = request.cookies.get("refresh")?.value;
+
+  const isRefreshValid = refreshToken && isTokenValid(refreshToken);
+
   if (AUTH_PAGES.includes(request.nextUrl.pathname)) {
-    if (refreshToken) {
+    if (refreshToken && isRefreshValid) {
       return NextResponse.redirect(new URL("/", request.url));
     }
     return NextResponse.next();
   }
 
-  // redirection logic for auth protected pages
-  try {
-    if (!refreshToken) {
-      throw "No Refresh Token present in cookie header";
+  if (!refreshToken || !isRefreshValid) {
+    const response = NextResponse.redirect(new URL("/login", request.url));
+    if (accessToken || refreshToken) {
+      response.cookies.delete("access");
+      response.cookies.delete("refresh");
     }
-    await axiosServerInstance.get("auth/authorization-check");
-    return NextResponse.next();
-  } catch (e) {
-    return NextResponse.redirect(new URL("/login", request.url));
+    return response;
   }
+  return NextResponse.next();
+
 }
 
 export const config = {

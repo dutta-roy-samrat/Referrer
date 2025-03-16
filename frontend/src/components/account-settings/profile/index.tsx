@@ -45,13 +45,15 @@ export type FormErrors = {
   profileImage?: string;
 };
 
-type FormSubmissionData = {
-  firstName: string;
-  lastName: string;
-  experience: number;
-  resume: File | null;
-  profileImage: File | null;
-} | Record<string, any>;
+type FormSubmissionData =
+  | {
+      firstName: string;
+      lastName: string;
+      experience: number;
+      resume: File | null;
+      profileImage: File | null;
+    }
+  | Record<string, any>;
 
 const defaultFormValues: FormState = {
   firstName: "",
@@ -191,7 +193,6 @@ const ProfileSettings = () => {
             fieldKey === "resume" ? "resumes/" : "profile_images/";
           const fileName = fetchedData.split(splitBy)[1];
           const { pathname } = new URL(fetchedData, MEDIA_LIBRARY_URL);
-          console.log(pathname.slice(1));
           return fetchFile({ data: pathname.slice(1), fileName }).then(
             (res) => {
               let value: File | undefined | string = res;

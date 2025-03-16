@@ -37,7 +37,7 @@ const PostCard: FC<PostProps> = ({
 }) => {
   const handleDeleteClick = async () => {
     try {
-      const res = await axiosInstance.delete(`/posts/delete/${id}`);
+      const res = await axiosInstance.delete(`/posts/delete/${id}/`);
       onSuccessToastMsg(res.data?.message);
     } catch (err) {
       const error = err as AxiosError;

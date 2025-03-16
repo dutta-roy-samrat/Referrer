@@ -10,7 +10,7 @@ from rest_framework.status import (
     HTTP_201_CREATED,
     HTTP_500_INTERNAL_SERVER_ERROR,
 )
-from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.tokens import AccessToken
 from users.serializers import RegisterUserSerializer
 from users.models import User
 from .serializers import PostsSerializer
@@ -19,21 +19,32 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+
 def get_paginated_query(queryset, limit, start_from):
     limit = int(limit) if limit else 20
     start_from = int(start_from) if start_from else 0
     return queryset[start_from : start_from + limit]
+
+
+def get_user_from_token(request):
+    auth_header = request.headers.get("Authorization")
+    if not auth_header or not auth_header.startswith("Bearer "):
+        return None
+
+    try:
+        token = auth_header.split(" ")[1]
+        return AccessToken(token).payload.get("user_id")
+    except:
+        return None
+
 
 class PostsView(APIView):
     authentication_classes = []
 
     def get(self, request, *args, **kwargs):
         try:
-            refresh_token = request.COOKIES.get("refresh")
-            user_id = RefreshToken(refresh_token).payload.get("user_id")
-        except:
-            user_id = None
-        try:
+            user_id = get_user_from_token(request)
+
             post_id = kwargs.get("id")
             if post_id:
                 post = get_object_or_404(Post, id=post_id)

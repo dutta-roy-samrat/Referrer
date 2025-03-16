@@ -16,7 +16,7 @@ const LogoutButton = () => {
     e,
   ) => {
     e.stopPropagation();
-    axiosInstance.post("/auth/logout").then(() => {
+    axiosInstance.post("/auth/logout/").then(() => {
       resetAuthData();
       push("/feed");
     });

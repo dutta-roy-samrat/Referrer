@@ -16,7 +16,6 @@ const DatePicker = ({ setDate, selectedDate }: DatePickerProps) => {
     activeModifiers: ActiveModifiers,
     e: React.MouseEvent,
   ) => {
-    console.log(day, selectedDay);
     if (!day) return;
     return setDate(day, selectedDay, activeModifiers, e);
   };

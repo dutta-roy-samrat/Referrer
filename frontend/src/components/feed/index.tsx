@@ -41,7 +41,6 @@ const Feed: FC<FeedProps> = ({
     };
 
     const handleMessage = (e: MessageEvent) => {
-      console.log(JSON.parse(e.data));
       try {
         const eventData = JSON.parse(e.data);
         if (eventData?.action === "delete") {
@@ -77,7 +76,7 @@ const Feed: FC<FeedProps> = ({
       setShowLoader(true);
       try {
         const { data: newPosts } = await axiosInstance.get<PostProps[]>(
-          `/posts?start_from=${posts.length}`,
+          `/posts/?start_from=${posts.length}`,
         );
 
         if (newPosts.length < POST_QUERY_LIMIT) {

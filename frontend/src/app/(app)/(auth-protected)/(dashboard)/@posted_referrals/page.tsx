@@ -14,7 +14,7 @@ import arrowIcon from "@/assets/icons/arrow.svg";
 
 import styles from "./main.module.css";
 
-const fetchMorePosts = () => axiosInstance.get("/posts/my-posts?start_from=0");
+const fetchMorePosts = () => axiosInstance.get("/posts/my-posts/?start_from=0");
 
 const PostedReferrals = () => {
   const { isLoading, data } = useQuery({
