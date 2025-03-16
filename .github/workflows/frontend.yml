@@ -1,0 +1,35 @@
+name: Referrer Frontend
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "frontend/**" 
+
+jobs:
+  build:
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Docker Login
+        run: echo ${{ secrets.DOCKER_PASSWORD }} | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
+
+      - name: Build Docker Image
+        run: docker build -t referrer-frontend .
+      
+      - name: Push Docker Image
+        run: docker tag referrer-frontend ${{ secrets.DOCKER_USERNAME }}/frontend
+        run: docker push ${{ secrets.DOCKER_USERNAME }}/frontend
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Deploy to Production
+        run: curl https://api.render.com/deploy/srv-cv4t0f56l47c73ar9g90?key=${{ secrets.RENDER_DEPLOY_HOOK }}
+
