@@ -9,7 +9,6 @@ import { cn } from "@/lib/utils";
 import styles from "./main.module.css";
 
 const Avatar = ({ avatarFallbackClass = "", avatarClass = "" }) => {
-  console.log("abc");
   const { data } = useAuthContext();
   const { firstName, lastName } = data;
   const getAllWordInitializers = () => {
