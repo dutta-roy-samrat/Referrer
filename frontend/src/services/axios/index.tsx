@@ -30,34 +30,40 @@ const resetCookies = () => {
 axiosInstance.interceptors.request.use(
   async (config) => {
     if (typeof window !== "undefined") {
+      console.log(config)
+      if (config.url === "/auth/logout/") {
+        resetCookies();
+        return config;
+      }
       const accessToken = getCookie("access");
 
       if (accessToken && isTokenValid(accessToken)) {
         config.headers["Authorization"] = `Bearer ${accessToken}`;
-      } else {
-        const refreshToken = getCookie("refresh");
+        return config;
+      }
+      const refreshToken = getCookie("refresh");
 
-        if (refreshToken && isTokenValid(refreshToken)) {
-          try {
-            const response = await axiosInstance.post(
-              "auth/authorization-check/",
-              {
-                refresh: refreshToken,
-              },
-            );
+      if (refreshToken && isTokenValid(refreshToken)) {
+        try {
+          const response = await axiosInstance.post(
+            "auth/authorization-check/",
+            {
+              refresh: refreshToken,
+            },
+          );
 
-            const newAccessToken = response.headers["x-access-token"];
-            if (newAccessToken) {
-              setCookie("access", newAccessToken);
-              config.headers["Authorization"] = `Bearer ${newAccessToken}`;
-            }
-          } catch {
-            resetCookies();
+          const newAccessToken = response.headers["x-access-token"];
+          if (newAccessToken) {
+            setCookie("access", newAccessToken);
+            config.headers["Authorization"] = `Bearer ${newAccessToken}`;
           }
-        } else {
+        } catch {
           resetCookies();
         }
+        return config;
       }
+      resetCookies();
+      return config;
     }
     return config;
   },
