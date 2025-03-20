@@ -55,6 +55,8 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
+print(os.environ)
+
 GRAPHENE = {"SCHEMA": "root.schema.schema"}
 
 CORS_ALLOWED_ORIGINS = [os.getenv("CORS_ALLOWED_ORIGINS", default="")]
