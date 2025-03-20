@@ -30,7 +30,6 @@ const resetCookies = () => {
 axiosInstance.interceptors.request.use(
   async (config) => {
     if (typeof window !== "undefined") {
-      console.log(config)
       if (config.url === "/auth/logout/") {
         resetCookies();
         return config;
