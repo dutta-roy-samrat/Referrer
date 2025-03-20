@@ -1,16 +1,20 @@
 #!/bin/sh
 
-set -e  # Exit if any command fails
+set -e  
 
-poetry run python manage.py migrate
+echo "Starting server..."
+
+echo "Applying database migrations..."
+poetry run python manage.py migrate 2>&1
+
 if [ "$ENVIRONMENT" = "production" ]; then
-    poetry run python manage.py collectstatic --noinput
     echo "Running in production mode"
-    exec daphne root.asgi:application -p 8000 -b 0.0.0.0
+    poetry run python manage.py collectstatic --noinput 2>&1
+    exec daphne root.asgi:application -p 8000 -b 0.0.0.0 
 
 elif [ "$ENVIRONMENT" = "development" ]; then
     echo "Running in development mode"
-    exec poetry run python manage.py runserver 0.0.0.0:8000  
+    exec poetry run python manage.py runserver 0.0.0.0:8000 
 
 else
     echo "ERROR: ENVIRONMENT variable not set. Exiting."
