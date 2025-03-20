@@ -5,7 +5,7 @@ ENV PATH=${POETRY_HOME}/bin:${PATH}
 
 RUN apt-get update \
     && apt-get install --no-install-recommends -y \
-    curl \
+    curl dos2unix \
     && curl -sSL https://install.python-poetry.org | python3 - \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
@@ -26,15 +26,12 @@ COPY --from=builder /app/.venv/ /app/.venv/
 
 COPY . .
 
+RUN dos2unix /app/scripts/server.sh
+
 ENV PATH="/app/.venv/bin:$PATH"
 
 WORKDIR /app/root
-RUN poetry run python manage.py collectstatic --noinput
 
 EXPOSE 8000
-
-RUN chmod +x /app/scripts/server.sh
-RUN useradd -m nonRootUser
-USER nonRootUser
 
 ENTRYPOINT [ "/app/scripts/server.sh" ]
