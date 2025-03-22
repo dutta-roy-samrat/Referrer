@@ -33,6 +33,9 @@
 LICENSE
 README.md
 
+# Ignore all env files except .env.production
+.env*
+!.env.production
+
 node_modules
 .next
-.env**
