@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Docker Login
         run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
@@ -23,20 +23,25 @@ jobs:
           SERVICE_ID: ${{ secrets.FRONTEND_SERVICE_ID }}
         run: |
           echo "Fetching secret file from Render API..."
-          SECRET_CONTENT=$(curl -s -H "Authorization: Bearer $RENDER_API_KEY" \
+          if ! SECRET_CONTENT=$(curl -s -f -H "Authorization: Bearer $RENDER_API_KEY" \
             "https://api.render.com/v1/services/$SERVICE_ID/secret-files" \
-            | jq -r '.[0].secretFile.content')
+            | jq -r '.[0].secretFile.content'); then
+            echo "Failed to fetch secrets from Render API"
+            exit 1
+          fi
 
           echo "Extracted secret content:"
           echo "$SECRET_CONTENT"
 
           echo "Exporting variables for later use..."
 
-          # Parse and export variables without appending to .env
           while IFS='=' read -r key value; do
+            key=$(echo "$key" | xargs)
+            value=$(echo "$value" | xargs | sed 's/^"//;s/"$//')
+            
             if [[ ! -z "$key" && ! "$key" =~ ^# ]]; then
-              echo "Exporting $key"
-              eval "export $key=\"$value\""
+              echo "Exporting $key=$value"
+              export "$key=$value"
             fi
           done <<< "$SECRET_CONTENT"
 
@@ -58,7 +63,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Deploy to Production
         run: curl -X POST https://api.render.com/deploy/${{secrets.FRONTEND_SERVICE_ID}}?key=${{ secrets.FRONTEND_RENDER_DEPLOY_HOOK }}
