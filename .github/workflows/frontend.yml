@@ -31,19 +31,20 @@ jobs:
             exit 1
           fi
 
+          # Clean up the format: remove spaces around = and unnecessary quotes
+          CLEANED_CONTENT=$(echo "$SECRET_CONTENT" | sed -E 's/\s*=\s*/=/g' | sed 's/"//g')
+
           echo "Creating .env.production file..."
-          echo "$SECRET_CONTENT" > frontend/.env.production
+          echo "$CLEANED_CONTENT" > frontend/.env.production
 
           echo "Environment file contents (with values):"
           echo "----------------------------------------"
           cat frontend/.env.production
           echo "----------------------------------------"
 
-          echo "Total number of environment variables:"
-          grep -v '^#' frontend/.env.production | grep -v '^$' | wc -l
-
-          echo "File permissions:"
-          ls -la frontend/.env.production
+          # Test reading a specific variable
+          echo "Testing NEXT_PUBLIC_API_URL value:"
+          grep NEXT_PUBLIC_API_URL frontend/.env.production
 
       - name: Build and Push Docker Image
         uses: docker/build-push-action@v4
