@@ -21,7 +21,6 @@ jobs:
       - name: Extract Environment Variables
         id: env-vars
         run: |
-          # Fetch secret file from Render
           echo "Fetching secret file from Render API..."
           if ! SECRET_CONTENT=$(curl -s -f -H "Authorization: Bearer ${{ secrets.RENDER_API_KEY }}" \
             "https://api.render.com/v1/services/${{ secrets.BACKEND_SERVICE_ID }}/secret-files" \
@@ -30,7 +29,6 @@ jobs:
             exit 1
           fi
 
-          # Extract and set variables as GitHub environment variables
           while read -r line; do
             key=$(echo "$line" | cut -d'=' -f1 | xargs)
             value=$(echo "$line" | cut -d'=' -f2- | sed 's/^[[:space:]]*"//;s/"[[:space:]]*$//')
