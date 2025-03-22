@@ -5,7 +5,7 @@ on:
     branches:
       - main
     paths:
-      - "frontend/**" 
+      - "frontend/**"
 
 jobs:
   build:
@@ -31,7 +31,7 @@ jobs:
           echo "$SECRET_CONTENT"
 
           echo "Exporting variables for later use..."
-          
+
           # Parse and export variables without appending to .env
           while IFS='=' read -r key value; do
             if [[ ! -z "$key" && ! "$key" =~ ^# ]]; then
@@ -40,18 +40,13 @@ jobs:
             fi
           done <<< "$SECRET_CONTENT"
 
-      - name: Build .env File
-        run: |
-          echo "Creating .env file..."
-          touch .env
-
-          echo "NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL" >> .env
-          echo "NEXT_PUBLIC_GRAPHQL_URL=$NEXT_PUBLIC_GRAPHQL_URL" >> .env
-          echo "NEXT_PUBLIC_MEDIA_LIBRARY_URL=$NEXT_PUBLIC_MEDIA_LIBRARY_URL" >> .env
-
       - name: Build Docker Image
-        run: docker build --env-file .env -t referrer-frontend frontend/
-
+        run: |
+          docker build \
+            --build-arg NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL \
+            --build-arg NEXT_PUBLIC_GRAPHQL_URL=$NEXT_PUBLIC_GRAPHQL_URL \
+            --build-arg NEXT_PUBLIC_MEDIA_LIBRARY_URL=$NEXT_PUBLIC_MEDIA_LIBRARY_URL \
+            -t referrer-frontend frontend/
 
       - name: Push Docker Image
         run: |
