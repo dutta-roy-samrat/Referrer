@@ -34,15 +34,20 @@ jobs:
           # Clean up the format: remove spaces around = and unnecessary quotes
           CLEANED_CONTENT=$(echo "$SECRET_CONTENT" | sed -E 's/\s*=\s*/=/g' | sed 's/"//g')
 
-          echo "Creating .env.production file..."
+          # Make sure we're creating the file in the correct location
+          echo "Creating .env.production file in frontend directory..."
           echo "$CLEANED_CONTENT" > frontend/.env.production
 
+          # Verify file exists and has content
           echo "Verifying environment file:"
+          ls -la frontend/.env.production
+          echo "File contents:"
           cat frontend/.env.production
 
       - name: Build and Push Docker Image
         run: |
-          docker build -t ${{ secrets.DOCKER_USERNAME }}/referrer-frontend:latest frontend/
+          cd frontend  # Change to frontend directory before building
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/referrer-frontend:latest .
           docker push ${{ secrets.DOCKER_USERNAME }}/referrer-frontend:latest
 
   deploy:
