@@ -18,35 +18,38 @@ jobs:
       - name: Docker Login
         run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
 
-      - name: Fetch and Create Environment Files
-        env:
-          RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
-          SERVICE_ID: ${{ secrets.FRONTEND_SERVICE_ID }}
+      - name: Extract Environment Variables
+        id: env-vars
         run: |
           echo "Fetching secret file from Render API..."
-          if ! SECRET_CONTENT=$(curl -s -f -H "Authorization: Bearer $RENDER_API_KEY" \
-            "https://api.render.com/v1/services/$SERVICE_ID/secret-files" \
+          if ! SECRET_CONTENT=$(curl -s -f -H "Authorization: Bearer ${{ secrets.RENDER_API_KEY }}" \
+            "https://api.render.com/v1/services/${{ secrets.FRONTEND_SERVICE_ID }}/secret-files" \
             | jq -r '.[0].secretFile.content'); then
             echo "Failed to fetch secrets from Render API"
             exit 1
           fi
 
-          # Clean up the format: remove spaces around = and unnecessary quotes
-          CLEANED_CONTENT=$(echo "$SECRET_CONTENT" | sed -E 's/\s*=\s*/=/g' | sed 's/"//g')
+          while read -r line; do
+            if [[ $line == NEXT_PUBLIC_* ]]; then
+              key=$(echo "$line" | cut -d'=' -f1 | xargs)
+              value=$(echo "$line" | cut -d'=' -f2- | sed 's/^[[:space:]]*"//;s/"[[:space:]]*$//')
+              echo "$key=$value" >> $GITHUB_ENV
+            fi
+          done <<< "$SECRET_CONTENT"
 
-          # Make sure we're creating the file in the correct location
-          echo "Creating .env.production file in frontend directory..."
-          echo "$CLEANED_CONTENT" > frontend/.env.production
-
-          # Verify file exists and has content
-          echo "Verifying environment file:"
-          ls -la frontend/.env.production
-          echo "File contents:"
-          cat frontend/.env.production
+      - name: Build Environment File
+        run: |
+          cd frontend
+          touch .env.production
+          
+          # Use the environment variables
+          echo "NEXT_PUBLIC_API_URL=${{ env.NEXT_PUBLIC_API_URL }}" >> .env.production
+          echo "NEXT_PUBLIC_MEDIA_LIBRARY_URL=${{ env.NEXT_PUBLIC_MEDIA_LIBRARY_URL }}" >> .env.production
+          echo "NEXT_PUBLIC_GRAPHQL_URL=${{ env.NEXT_PUBLIC_GRAPHQL_URL }}" >> .env.production
 
       - name: Build and Push Docker Image
         run: |
-          cd frontend  # Change to frontend directory before building
+          cd frontend
           docker build -t ${{ secrets.DOCKER_USERNAME }}/referrer-frontend:latest .
           docker push ${{ secrets.DOCKER_USERNAME }}/referrer-frontend:latest
 
