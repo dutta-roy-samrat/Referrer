@@ -2,12 +2,14 @@ FROM node:22.11.0-alpine AS base
 
 WORKDIR /app
 COPY ./package.json ./package-lock.json ./yarn.lock ./
+COPY .env.production .env.production
 RUN yarn install --frozen-lockfile && yarn cache clean
 
 FROM node:22.11.0-alpine AS build
 WORKDIR /app
 COPY . .
 COPY --from=base /app/node_modules ./node_modules
+COPY --from=base /app/.env.production .env.production
 RUN yarn build
 
 FROM node:22.11.0-alpine AS final
@@ -20,6 +22,7 @@ WORKDIR /app
 
 COPY --from=build /app/.next ./.next
 COPY --from=build /app/.next/static ./.next/standalone/.next/static
+COPY --from=build /app/.env.production .env.production
 
 EXPOSE 3000
 

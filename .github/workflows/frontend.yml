@@ -37,22 +37,13 @@ jobs:
           echo "Creating .env.production file..."
           echo "$CLEANED_CONTENT" > frontend/.env.production
 
-          echo "Environment file contents (with values):"
-          echo "----------------------------------------"
+          echo "Verifying environment file:"
           cat frontend/.env.production
-          echo "----------------------------------------"
-
-          # Test reading a specific variable
-          echo "Testing NEXT_PUBLIC_API_URL value:"
-          grep NEXT_PUBLIC_API_URL frontend/.env.production
 
       - name: Build and Push Docker Image
-        uses: docker/build-push-action@v4
-        with:
-          context: ./frontend
-          push: true
-          tags: |
-            ${{ secrets.DOCKER_USERNAME }}/referrer-frontend:latest
+        run: |
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/referrer-frontend:latest frontend/
+          docker push ${{ secrets.DOCKER_USERNAME }}/referrer-frontend:latest
 
   deploy:
     needs: build
