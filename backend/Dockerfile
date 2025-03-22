@@ -14,6 +14,7 @@ FROM base AS builder
 
 WORKDIR /app
 COPY poetry.lock pyproject.toml ./
+COPY .env ./
 
 RUN poetry config virtualenvs.in-project true \
     && poetry install --only main --no-interaction
@@ -23,6 +24,7 @@ FROM base AS production
 WORKDIR /app
 
 COPY --from=builder /app/.venv/ /app/.venv/
+COPY --from=builder /app/.env ./
 
 COPY . .
 

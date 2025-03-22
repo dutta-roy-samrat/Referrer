@@ -6,19 +6,70 @@ on:
       - main
     paths:
       - "backend/**" 
+  workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Docker Login
         run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
 
+      - name: Extract Environment Variables
+        id: env-vars
+        run: |
+          # Fetch secret file from Render
+          echo "Fetching secret file from Render API..."
+          if ! SECRET_CONTENT=$(curl -s -f -H "Authorization: Bearer ${{ secrets.RENDER_API_KEY }}" \
+            "https://api.render.com/v1/services/${{ secrets.BACKEND_SERVICE_ID }}/secret-files" \
+            | jq -r '.[0].secretFile.content'); then
+            echo "Failed to fetch secrets from Render API"
+            exit 1
+          fi
+
+          # Extract and set variables as GitHub environment variables
+          while read -r line; do
+            key=$(echo "$line" | cut -d'=' -f1 | xargs)
+            value=$(echo "$line" | cut -d'=' -f2- | sed 's/^[[:space:]]*"//;s/"[[:space:]]*$//')
+            echo "$key=$value" >> $GITHUB_ENV
+          done <<< "$SECRET_CONTENT"
+
+      - name: Create Environment File
+        run: |
+          cd backend
+          touch .env
+          
+          # Django core settings
+          echo "SECRET_KEY=${{ env.SECRET_KEY }}" >> .env
+          echo "DEBUG=${{ env.DEBUG }}" >> .env
+          echo "ALLOWED_HOSTS=${{ env.ALLOWED_HOSTS }}" >> .env
+          echo "ENVIRONMENT=${{ env.ENVIRONMENT }}" >> .env
+          
+          # Database settings
+          echo "DB_USER=${{ env.DB_USER }}" >> .env
+          echo "DB_PASSWORD=${{ env.DB_PASSWORD }}" >> .env
+          echo "DB_HOST=${{ env.DB_HOST }}" >> .env
+          echo "DB_NAME=${{ env.DB_NAME }}" >> .env
+          
+          # Email settings
+          echo "BREVO_EMAIL_HOST_USER=${{ env.BREVO_EMAIL_HOST_USER }}" >> .env
+          echo "BREVO_EMAIL_HOST_PASSWORD=${{ env.BREVO_EMAIL_HOST_PASSWORD }}" >> .env
+          echo "BREVO_DEFAULT_EMAIL=${{ env.BREVO_DEFAULT_EMAIL }}" >> .env
+          
+          # Security settings
+          echo "CORS_ALLOWED_ORIGINS=${{ env.CORS_ALLOWED_ORIGINS }}" >> .env
+          echo "CSRF_TRUSTED_ORIGINS=${{ env.CSRF_TRUSTED_ORIGINS }}" >> .env
+          echo "FRONTEND_DOMAIN=${{ env.FRONTEND_DOMAIN }}" >> .env
+          
+          echo "Environment file created successfully"
+
       - name: Build Docker Image
-        run: docker build -t referrer-backend backend/
+        run: |
+          cd backend
+          docker build -t referrer-backend .
 
       - name: Push Docker Image
         run: |
@@ -29,8 +80,5 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-
       - name: Deploy to Production
-        run: curl -X POST https://api.render.com/deploy/srv-cv3k6brqf0us73fcjb2g?key=${{ secrets.BACKEND_RENDER_DEPLOY_HOOK }}
+        run: curl -X POST https://api.render.com/deploy/${{secrets.BACKEND_SERVICE_ID}}?key=${{ secrets.BACKEND_RENDER_DEPLOY_HOOK }}
