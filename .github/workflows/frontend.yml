@@ -50,7 +50,8 @@ jobs:
           echo "NEXT_PUBLIC_MEDIA_LIBRARY_URL=$NEXT_PUBLIC_MEDIA_LIBRARY_URL" >> .env
 
       - name: Build Docker Image
-        run: docker build -t referrer-frontend frontend/
+        run: docker build --env-file .env -t referrer-frontend frontend/
+
 
       - name: Push Docker Image
         run: |
