@@ -34,9 +34,16 @@ jobs:
           echo "Creating .env.production file..."
           echo "$SECRET_CONTENT" > frontend/.env.production
 
-          echo "Verifying .env.production was created:"
+          echo "Environment file contents (with values):"
+          echo "----------------------------------------"
+          cat frontend/.env.production
+          echo "----------------------------------------"
+
+          echo "Total number of environment variables:"
+          grep -v '^#' frontend/.env.production | grep -v '^$' | wc -l
+
+          echo "File permissions:"
           ls -la frontend/.env.production
-          echo "Environment file created successfully"
 
       - name: Build and Push Docker Image
         uses: docker/build-push-action@v4
