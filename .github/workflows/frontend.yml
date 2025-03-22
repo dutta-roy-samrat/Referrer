@@ -17,6 +17,38 @@ jobs:
       - name: Docker Login
         run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
 
+      - name: Fetch and Extract Render Secret Variables
+        env:
+          RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
+          SERVICE_ID: ${{ secrets.FRONTEND_SERVICE_ID }}
+        run: |
+          echo "Fetching secret file from Render API..."
+          SECRET_CONTENT=$(curl -s -H "Authorization: Bearer $RENDER_API_KEY" \
+            "https://api.render.com/v1/services/$SERVICE_ID/secret-files" \
+            | jq -r '.[0].secretFile.content')
+
+          echo "Extracted secret content:"
+          echo "$SECRET_CONTENT"
+
+          echo "Exporting variables for later use..."
+          
+          # Parse and export variables without appending to .env
+          while IFS='=' read -r key value; do
+            if [[ ! -z "$key" && ! "$key" =~ ^# ]]; then
+              echo "Exporting $key"
+              eval "export $key=\"$value\""
+            fi
+          done <<< "$SECRET_CONTENT"
+
+      - name: Build .env File
+        run: |
+          echo "Creating .env file..."
+          touch .env
+
+          echo "NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL" >> .env
+          echo "NEXT_PUBLIC_GRAPHQL_URL=$NEXT_PUBLIC_GRAPHQL_URL" >> .env
+          echo "NEXT_PUBLIC_MEDIA_LIBRARY_URL=$NEXT_PUBLIC_MEDIA_LIBRARY_URL" >> .env
+
       - name: Build Docker Image
         run: docker build -t referrer-frontend frontend/
 
@@ -33,4 +65,4 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Deploy to Production
-        run: curl -X POST https://api.render.com/deploy/srv-cv4t0f56l47c73ar9g90?key=${{ secrets.FRONTEND_RENDER_DEPLOY_HOOK }}
+        run: curl -X POST https://api.render.com/deploy/${{secrets.FRONTEND_SERVICE_ID}}?key=${{ secrets.FRONTEND_RENDER_DEPLOY_HOOK }}
