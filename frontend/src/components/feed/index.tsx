@@ -35,7 +35,7 @@ const Feed: FC<FeedProps> = ({
     const eventSource = new EventSource(`${API_URL}/posts/events/`, {
       withCredentials: true,
     });
-
+    console.log("test");
     eventSource.onopen = () => {
       console.log("Connection opened");
     };
