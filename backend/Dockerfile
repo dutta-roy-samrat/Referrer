@@ -35,8 +35,8 @@ RUN mkdir -p /app/logs
 
 ENV PATH="/app/.venv/bin:$PATH"
 
-WORKDIR /app/root
-
 EXPOSE 8000
+
+WORKDIR /app/root
 
 ENTRYPOINT ["/bin/sh", "-c", "exec /app/scripts/server.sh 2>&1 | tee /app/logs/server.log"]
