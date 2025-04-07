@@ -40,7 +40,9 @@ INSTALLED_APPS = [
 ]
 
 REST_FRAMEWORK = {
-    "DEFAULT_AUTHENTICATION_CLASSES": ["rest_framework_simplejwt.authentication.JWTAuthentication"]
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "rest_framework_simplejwt.authentication.JWTAuthentication"
+    ]
 }
 
 MIDDLEWARE = [
@@ -102,6 +104,9 @@ DATABASES = {
         "PASSWORD": os.getenv("DB_PASSWORD", default=""),
         "HOST": os.getenv("DB_HOST", default=""),
         "PORT": "5432",
+        "OPTIONS": {
+            "sslmode": "verify-full",
+        },
     }
 }
 
