@@ -67,7 +67,7 @@ jobs:
       - name: Build Docker Image
         run: |
           cd backend
-          docker build -t referrer-backend .
+          docker build -t referrer-backend --build-arg ENVIRONMENT=${{ env.ENVIRONMENT }} .
 
       - name: Push Docker Image
         run: |
