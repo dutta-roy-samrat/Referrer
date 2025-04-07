@@ -51,13 +51,13 @@ jobs:
           
           # Database settings
           echo "DB_USER=${{ env.DB_USER }}" >> .env
-          echo "DB_PASSWORD=${{ env.DB_PASSWORD }}" >> .env
+          echo "DB_PASSWORD=********" >> .env  # Masked for security
           echo "DB_HOST=${{ env.DB_HOST }}" >> .env
           echo "DB_NAME=${{ env.DB_NAME }}" >> .env
           
           # Email settings
           echo "BREVO_EMAIL_HOST_USER=${{ env.BREVO_EMAIL_HOST_USER }}" >> .env
-          echo "BREVO_EMAIL_HOST_PASSWORD=${{ env.BREVO_EMAIL_HOST_PASSWORD }}" >> .env
+          echo "BREVO_EMAIL_HOST_PASSWORD=********" >> .env  # Masked for security
           echo "BREVO_DEFAULT_EMAIL=${{ env.BREVO_DEFAULT_EMAIL }}" >> .env
           
           # Security settings
@@ -66,7 +66,16 @@ jobs:
           echo "FRONTEND_DOMAIN=${{ env.FRONTEND_DOMAIN }}" >> .env
           
           echo "Environment file created successfully"
+          
+          # Debug: Print .env file contents (with sensitive data masked)
+          echo "=== Environment File Contents ==="
+          cat .env | sed 's/\(PASSWORD=\|KEY=\).*/\1********/'
 
+      - name: Verify Build Arguments
+        run: |
+          echo "=== Build Arguments ==="
+          echo "ENVIRONMENT: ${{ env.ENVIRONMENT }}"
+          
       - name: Build Docker Image
         run: |
           cd backend
